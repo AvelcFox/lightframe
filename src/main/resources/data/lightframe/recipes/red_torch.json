@@ -1,0 +1,12 @@
+﻿{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    { "item": "minecraft:torch" },
+    { "item": "minecraft:red_dye" }
+  ],
+  "result": {
+    "item": "lightframe:red_torch",
+    "count": 1
+  }
+}
+

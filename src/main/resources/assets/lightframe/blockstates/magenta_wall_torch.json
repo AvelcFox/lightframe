@@ -1,0 +1,9 @@
+﻿{
+  "variants": {
+    "facing=north": { "model": "lightframe:block/magenta_wall_torch" },
+    "facing=east": { "model": "lightframe:block/magenta_wall_torch", "y": 90 },
+    "facing=south": { "model": "lightframe:block/magenta_wall_torch", "y": 180 },
+    "facing=west": { "model": "lightframe:block/magenta_wall_torch", "y": 270 }
+  }
+}
+

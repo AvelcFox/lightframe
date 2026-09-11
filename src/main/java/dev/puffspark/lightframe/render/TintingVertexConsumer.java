@@ -1,0 +1,283 @@
+package dev.puffspark.lightframe.render;
+
+import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.render.model.BakedQuad;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3i;
+import net.minecraft.world.World;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
+
+/**
+ * Transparent decorator over {@link VertexConsumer} that applies RGB lighting tint
+ * and boosts vanilla block light in the vertex lightmap coordinates.
+ * Supports smooth per-vertex gradient tinting for chunk terrain meshes and
+ * uniform tinting for entities / fluids.
+ */
+public final class TintingVertexConsumer implements VertexConsumer {
+
+    private final VertexConsumer delegate;
+    private final World world;
+    private final BlockPos blockPos;
+    private final float uniformTr, uniformTg, uniformTb;
+    private final int fallbackBoost;
+    private final boolean perVertex;
+
+    /** Constructor for terrain blocks with per-vertex smooth gradient tinting and light boost. */
+    public TintingVertexConsumer(VertexConsumer delegate, World world, BlockPos blockPos,
+                                 float fallbackR, float fallbackG, float fallbackB, int fallbackBoost) {
+        this.delegate = delegate;
+        this.world = world;
+        this.blockPos = blockPos;
+        this.uniformTr = fallbackR;
+        this.uniformTg = fallbackG;
+        this.uniformTb = fallbackB;
+        this.fallbackBoost = fallbackBoost;
+        this.perVertex = true;
+    }
+
+    /** Constructor for entities and fallback flat tinting with optional light boost. */
+    public TintingVertexConsumer(VertexConsumer delegate, float r, float g, float b, int boost) {
+        this.delegate = delegate;
+        this.world = null;
+        this.blockPos = null;
+        this.uniformTr = r;
+        this.uniformTg = g;
+        this.uniformTb = b;
+        this.fallbackBoost = boost;
+        this.perVertex = false;
+    }
+
+    /** Constructor for entities and fallback flat tinting. */
+    public TintingVertexConsumer(VertexConsumer delegate, float r, float g, float b) {
+        this(delegate, r, g, b, 0);
+    }
+
+    public VertexConsumer delegate() {
+        return delegate;
+    }
+
+    // ---------------------------------------------------------- tinted entry points
+
+    @Override
+    public void quad(MatrixStack.Entry entry, BakedQuad quad, float red, float green, float blue,
+                     int light, int overlay) {
+        if (!perVertex || world == null || blockPos == null) {
+            delegate.quad(entry, quad, red * uniformTr, green * uniformTg, blue * uniformTb, light, overlay);
+            return;
+        }
+
+        int[] vertexData = quad.getVertexData();
+        Direction face = quad.getFace();
+        Matrix4f posMat = entry.getPositionMatrix();
+        Matrix3f normMat = entry.getNormalMatrix();
+        Vec3i faceVec = face.getVector();
+        Vector3f normal = new Vector3f((float) faceVec.getX(), (float) faceVec.getY(), (float) faceVec.getZ());
+        normal.mul(normMat);
+
+        float[] vTint = new float[3];
+
+        for (int k = 0; k < 4; k++) {
+            int off = k * 8;
+            float vx = Float.intBitsToFloat(vertexData[off + 0]);
+            float vy = Float.intBitsToFloat(vertexData[off + 1]);
+            float vz = Float.intBitsToFloat(vertexData[off + 2]);
+
+            int boost = VanillaLightingBackend.sampleVertexTintAndBoost(world, blockPos, face, vx, vy, vz, vTint);
+
+            int colorInt = vertexData[off + 3];
+            float l = (float) (colorInt & 0xFF) / 255.0f;
+            float m = (float) ((colorInt >>> 8) & 0xFF) / 255.0f;
+            float n = (float) ((colorInt >>> 16) & 0xFF) / 255.0f;
+
+            float r = l * red * vTint[0];
+            float g = m * green * vTint[1];
+            float b = n * blue * vTint[2];
+
+            float u = Float.intBitsToFloat(vertexData[off + 4]);
+            float v = Float.intBitsToFloat(vertexData[off + 5]);
+
+            int blockLight = light & 0xFFFF;
+            int skyLight = (light >> 16) & 0xFFFF;
+            int finalBlockLight = Math.max(blockLight, boost);
+            int finalLight = (skyLight << 16) | finalBlockLight;
+
+            Vector4f worldPos = posMat.transform(new Vector4f(vx, vy, vz, 1.0f));
+            delegate.vertex(
+                    worldPos.x(), worldPos.y(), worldPos.z(),
+                    r, g, b, 1.0f,
+                    u, v,
+                    overlay, finalLight,
+                    normal.x(), normal.y(), normal.z()
+            );
+        }
+    }
+
+    @Override
+    public void quad(MatrixStack.Entry entry, BakedQuad quad, float[] brightness,
+                     float red, float green, float blue,
+                     int[] lights, int light, boolean cull) {
+        if (!perVertex || world == null || blockPos == null) {
+            delegate.quad(entry, quad, brightness, red * uniformTr, green * uniformTg, blue * uniformTb, lights, light, cull);
+            return;
+        }
+
+        int[] vertexData = quad.getVertexData();
+        Direction face = quad.getFace();
+        Matrix4f posMat = entry.getPositionMatrix();
+        Matrix3f normMat = entry.getNormalMatrix();
+        Vec3i faceVec = face.getVector();
+        Vector3f normal = new Vector3f((float) faceVec.getX(), (float) faceVec.getY(), (float) faceVec.getZ());
+        normal.mul(normMat);
+
+        float[] vTint = new float[3];
+
+        for (int k = 0; k < 4; k++) {
+            int off = k * 8;
+            float vx = Float.intBitsToFloat(vertexData[off + 0]);
+            float vy = Float.intBitsToFloat(vertexData[off + 1]);
+            float vz = Float.intBitsToFloat(vertexData[off + 2]);
+
+            int boost = VanillaLightingBackend.sampleVertexTintAndBoost(world, blockPos, face, vx, vy, vz, vTint);
+
+            int colorInt = vertexData[off + 3];
+            float l = (float) (colorInt & 0xFF) / 255.0f;
+            float m = (float) ((colorInt >>> 8) & 0xFF) / 255.0f;
+            float n = (float) ((colorInt >>> 16) & 0xFF) / 255.0f;
+
+            float r = (cull ? l * red : red) * brightness[k] * vTint[0];
+            float g = (cull ? m * green : green) * brightness[k] * vTint[1];
+            float b = (cull ? n * blue : blue) * brightness[k] * vTint[2];
+
+            float u = Float.intBitsToFloat(vertexData[off + 4]);
+            float v = Float.intBitsToFloat(vertexData[off + 5]);
+
+            int vertexLight = lights[k];
+            int blockLight = vertexLight & 0xFFFF;
+            int skyLight = (vertexLight >> 16) & 0xFFFF;
+            int finalBlockLight = Math.max(blockLight, boost);
+            int finalLight = (skyLight << 16) | finalBlockLight;
+
+            Vector4f worldPos = posMat.transform(new Vector4f(vx, vy, vz, 1.0f));
+            delegate.vertex(
+                    worldPos.x(), worldPos.y(), worldPos.z(),
+                    r, g, b, 1.0f,
+                    u, v,
+                    light, finalLight,
+                    normal.x(), normal.y(), normal.z()
+            );
+        }
+    }
+
+    @Override
+    public VertexConsumer color(int red, int green, int blue, int alpha) {
+        return delegate.color(
+                (int) (red * uniformTr),
+                (int) (green * uniformTg),
+                (int) (blue * uniformTb),
+                alpha);
+    }
+
+    @Override
+    public VertexConsumer color(float red, float green, float blue, float alpha) {
+        return delegate.color(red * uniformTr, green * uniformTg, blue * uniformTb, alpha);
+    }
+
+    @Override
+    public void vertex(float x, float y, float z,
+                       float red, float green, float blue, float alpha,
+                       float u, float v,
+                       int overlay, int light,
+                       float normalX, float normalY, float normalZ) {
+        if (fallbackBoost > 0) {
+            int blockLight = light & 0xFFFF;
+            int skyLight = (light >> 16) & 0xFFFF;
+            light = (skyLight << 16) | Math.max(blockLight, fallbackBoost);
+        }
+        delegate.vertex(x, y, z, red * uniformTr, green * uniformTg, blue * uniformTb, alpha, u, v, overlay, light, normalX, normalY, normalZ);
+    }
+
+    // ---------------------------------------------------------- pass-through
+
+    @Override
+    public VertexConsumer vertex(double x, double y, double z) {
+        return delegate.vertex(x, y, z);
+    }
+
+    @Override
+    public VertexConsumer vertex(Matrix4f matrix, float x, float y, float z) {
+        return delegate.vertex(matrix, x, y, z);
+    }
+
+    @Override
+    public VertexConsumer color(int argb) {
+        return delegate.color(argb);
+    }
+
+    @Override
+    public VertexConsumer texture(float u, float v) {
+        return delegate.texture(u, v);
+    }
+
+    @Override
+    public VertexConsumer overlay(int uv) {
+        return delegate.overlay(uv);
+    }
+
+    @Override
+    public VertexConsumer overlay(int u, int v) {
+        return delegate.overlay(u, v);
+    }
+
+    @Override
+    public VertexConsumer light(int uv) {
+        if (fallbackBoost > 0) {
+            int blockLight = uv & 0xFFFF;
+            int skyLight = (uv >> 16) & 0xFFFF;
+            uv = (skyLight << 16) | Math.max(blockLight, fallbackBoost);
+        }
+        return delegate.light(uv);
+    }
+
+    @Override
+    public VertexConsumer light(int u, int v) {
+        if (fallbackBoost > 0) {
+            u = Math.max(u, fallbackBoost);
+        }
+        return delegate.light(u, v);
+    }
+
+    @Override
+    public VertexConsumer normal(float x, float y, float z) {
+        return delegate.normal(x, y, z);
+    }
+
+    @Override
+    public VertexConsumer normal(Matrix3f matrix, float x, float y, float z) {
+        return delegate.normal(matrix, x, y, z);
+    }
+
+    @Override
+    public void fixedColor(int red, int green, int blue, int alpha) {
+        delegate.fixedColor(
+                (int) (red * uniformTr),
+                (int) (green * uniformTg),
+                (int) (blue * uniformTb),
+                alpha);
+    }
+
+    @Override
+    public void unfixColor() {
+        delegate.unfixColor();
+    }
+
+    @Override
+    public void next() {
+        delegate.next();
+    }
+}
+

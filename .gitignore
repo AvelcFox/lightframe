@@ -1,0 +1,11 @@
+build/
+.gradle/
+run/
+*.iml
+.idea/
+bin/
+.vscode/
+.settings/
+*.log
+scratch_*
+*.zip

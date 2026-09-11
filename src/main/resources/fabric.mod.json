@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "lightframe",
+  "version": "${version}",
+  "name": "LightFrame",
+  "description": "True RGB dynamic lighting engine on top of the vanilla renderer.",
+  "authors": [
+    "Avelc"
+  ],
+  "contributors": [
+    "puffspark"
+  ],
+  "contact": {
+    "homepage": "https://github.com/Avelc/lightframe",
+    "sources": "https://github.com/Avelc/lightframe",
+    "issues": "https://github.com/Avelc/lightframe/issues"
+  },
+  "license": "LGPL-3.0",
+  "icon": "assets/lightframe/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "dev.puffspark.lightframe.LightFrame"
+    ],
+    "client": [
+      "dev.puffspark.lightframe.LightFrameClient"
+    ]
+  },
+  "mixins": [
+    "lightframe.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.15.0",
+    "fabric-api": "*",
+    "minecraft": "~1.20.1",
+    "java": ">=17"
+  }
+}
