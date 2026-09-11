@@ -15,7 +15,7 @@ public class ColoredWallTorchBlock extends WallTorchBlock {
     protected final TorchColor torchColor;
 
     public ColoredWallTorchBlock(Settings settings, TorchColor torchColor) {
-        super(settings, ParticleTypes.FLAME);
+        super(ParticleTypes.FLAME, settings);
         this.torchColor = torchColor;
     }
 

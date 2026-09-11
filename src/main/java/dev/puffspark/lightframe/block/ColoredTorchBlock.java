@@ -14,7 +14,7 @@ public class ColoredTorchBlock extends TorchBlock {
     protected final TorchColor torchColor;
 
     public ColoredTorchBlock(Settings settings, TorchColor torchColor) {
-        super(settings, ParticleTypes.FLAME);
+        super(ParticleTypes.FLAME, settings);
         this.torchColor = torchColor;
     }
 

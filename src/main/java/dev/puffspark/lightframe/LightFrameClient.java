@@ -42,10 +42,11 @@ public final class LightFrameClient implements ClientModInitializer {
             return dev.puffspark.lightframe.engine.EngineListener.EMPTY;
         });
 
-        ClientPlayNetworking.registerGlobalReceiver(ColorLightNetworking.SYNC,
-                (client, handler, buf, responseSender) -> {
+        ClientPlayNetworking.registerGlobalReceiver(ColorLightNetworking.SyncPayload.ID,
+                (payload, context) -> {
+                    PacketByteBuf buf = new PacketByteBuf(io.netty.buffer.Unpooled.wrappedBuffer(payload.data()));
                     List<java.util.function.Consumer<World>> ops = readOps(buf);
-                    client.execute(() -> applyOps(client, ops));
+                    context.client().execute(() -> applyOps(context.client(), ops));
                 });
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> tick(client));

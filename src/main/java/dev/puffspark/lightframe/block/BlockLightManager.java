@@ -59,7 +59,7 @@ public final class BlockLightManager {
     private static void markDirty(World world, BlockPos pos, TorchColor color, boolean remove) {
         if (world instanceof ServerWorld serverWorld) {
             TorchPersistentState state = serverWorld.getPersistentStateManager().getOrCreate(
-                    TorchPersistentState::fromNbt, TorchPersistentState::new, "LightFrame_torches");
+                    TorchPersistentState.TYPE, "lightframe_torches");
             if (remove) {
                 state.remove(pos);
             } else if (color != null) {
@@ -71,7 +71,7 @@ public final class BlockLightManager {
 
     public static void onServerWorldLoaded(ServerWorld world) {
         TorchPersistentState state = world.getPersistentStateManager().getOrCreate(
-                TorchPersistentState::fromNbt, TorchPersistentState::new, "LightFrame_torches");
+                TorchPersistentState.TYPE, "lightframe_torches");
         Long2ObjectOpenHashMap<UUID> map = WORLD_TORCHES.computeIfAbsent(world, w -> new Long2ObjectOpenHashMap<>());
 
         for (Map.Entry<BlockPos, TorchColor> entry : state.torches.entrySet()) {
@@ -86,11 +86,17 @@ public final class BlockLightManager {
     }
 
     public static class TorchPersistentState extends PersistentState {
+        public static final Type<TorchPersistentState> TYPE = new Type<>(
+                TorchPersistentState::new,
+                TorchPersistentState::fromNbt,
+                null
+        );
+
         final Map<BlockPos, TorchColor> torches = new ConcurrentHashMap<>();
 
         public TorchPersistentState() {}
 
-        public static TorchPersistentState fromNbt(NbtCompound tag) {
+        public static TorchPersistentState fromNbt(NbtCompound tag, net.minecraft.registry.RegistryWrapper.WrapperLookup registryLookup) {
             TorchPersistentState state = new TorchPersistentState();
             NbtList list = tag.getList("Torches", NbtElement.COMPOUND_TYPE);
             for (int i = 0; i < list.size(); i++) {
@@ -106,7 +112,7 @@ public final class BlockLightManager {
         }
 
         @Override
-        public NbtCompound writeNbt(NbtCompound nbt) {
+        public NbtCompound writeNbt(NbtCompound nbt, net.minecraft.registry.RegistryWrapper.WrapperLookup registryLookup) {
             NbtList list = new NbtList();
             for (Map.Entry<BlockPos, TorchColor> e : torches.entrySet()) {
                 NbtCompound t = new NbtCompound();

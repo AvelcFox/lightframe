@@ -24,7 +24,7 @@ public final class LightFrame implements ModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
     public static Identifier id(String path) {
-        return new Identifier(MOD_ID, path);
+        return Identifier.of(MOD_ID, path);
     }
 
     @Override
@@ -35,6 +35,7 @@ public final class LightFrame implements ModInitializer {
         EngineRegistry.setListenerFactory(world -> EngineListener.EMPTY);
 
         dev.puffspark.lightframe.block.ModBlocks.register();
+        ColorLightNetworking.initCommon();
         ColorLightNetworking.registerServer();
         ColorLightCommands.register();
 

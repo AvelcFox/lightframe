@@ -64,10 +64,10 @@ public final class TintingVertexConsumer implements VertexConsumer {
     // ---------------------------------------------------------- tinted entry points
 
     @Override
-    public void quad(MatrixStack.Entry entry, BakedQuad quad, float red, float green, float blue,
+    public void quad(MatrixStack.Entry entry, BakedQuad quad, float red, float green, float blue, float alpha,
                      int light, int overlay) {
         if (!perVertex || world == null || blockPos == null) {
-            delegate.quad(entry, quad, red * uniformTr, green * uniformTg, blue * uniformTb, light, overlay);
+            delegate.quad(entry, quad, red * uniformTr, green * uniformTg, blue * uniformTb, alpha, light, overlay);
             return;
         }
 
@@ -93,6 +93,7 @@ public final class TintingVertexConsumer implements VertexConsumer {
             float l = (float) (colorInt & 0xFF) / 255.0f;
             float m = (float) ((colorInt >>> 8) & 0xFF) / 255.0f;
             float n = (float) ((colorInt >>> 16) & 0xFF) / 255.0f;
+            float a = (float) ((colorInt >>> 24) & 0xFF) / 255.0f;
 
             float r = l * red * vTint[0];
             float g = m * green * vTint[1];
@@ -107,22 +108,21 @@ public final class TintingVertexConsumer implements VertexConsumer {
             int finalLight = (skyLight << 16) | finalBlockLight;
 
             Vector4f worldPos = posMat.transform(new Vector4f(vx, vy, vz, 1.0f));
-            delegate.vertex(
-                    worldPos.x(), worldPos.y(), worldPos.z(),
-                    r, g, b, 1.0f,
-                    u, v,
-                    overlay, finalLight,
-                    normal.x(), normal.y(), normal.z()
-            );
+            delegate.vertex(worldPos.x(), worldPos.y(), worldPos.z())
+                    .color(r, g, b, alpha * a)
+                    .texture(u, v)
+                    .overlay(overlay)
+                    .light(finalLight)
+                    .normal(normal.x(), normal.y(), normal.z());
         }
     }
 
     @Override
     public void quad(MatrixStack.Entry entry, BakedQuad quad, float[] brightness,
-                     float red, float green, float blue,
-                     int[] lights, int light, boolean cull) {
+                     float red, float green, float blue, float alpha,
+                     int[] lights, int overlay, boolean useWorldLight) {
         if (!perVertex || world == null || blockPos == null) {
-            delegate.quad(entry, quad, brightness, red * uniformTr, green * uniformTg, blue * uniformTb, lights, light, cull);
+            delegate.quad(entry, quad, brightness, red * uniformTr, green * uniformTg, blue * uniformTb, alpha, lights, overlay, useWorldLight);
             return;
         }
 
@@ -148,10 +148,11 @@ public final class TintingVertexConsumer implements VertexConsumer {
             float l = (float) (colorInt & 0xFF) / 255.0f;
             float m = (float) ((colorInt >>> 8) & 0xFF) / 255.0f;
             float n = (float) ((colorInt >>> 16) & 0xFF) / 255.0f;
+            float a = (float) ((colorInt >>> 24) & 0xFF) / 255.0f;
 
-            float r = (cull ? l * red : red) * brightness[k] * vTint[0];
-            float g = (cull ? m * green : green) * brightness[k] * vTint[1];
-            float b = (cull ? n * blue : blue) * brightness[k] * vTint[2];
+            float r = (useWorldLight ? l * red : red) * brightness[k] * vTint[0];
+            float g = (useWorldLight ? m * green : green) * brightness[k] * vTint[1];
+            float b = (useWorldLight ? n * blue : blue) * brightness[k] * vTint[2];
 
             float u = Float.intBitsToFloat(vertexData[off + 4]);
             float v = Float.intBitsToFloat(vertexData[off + 5]);
@@ -163,13 +164,12 @@ public final class TintingVertexConsumer implements VertexConsumer {
             int finalLight = (skyLight << 16) | finalBlockLight;
 
             Vector4f worldPos = posMat.transform(new Vector4f(vx, vy, vz, 1.0f));
-            delegate.vertex(
-                    worldPos.x(), worldPos.y(), worldPos.z(),
-                    r, g, b, 1.0f,
-                    u, v,
-                    light, finalLight,
-                    normal.x(), normal.y(), normal.z()
-            );
+            delegate.vertex(worldPos.x(), worldPos.y(), worldPos.z())
+                    .color(r, g, b, alpha * a)
+                    .texture(u, v)
+                    .overlay(overlay)
+                    .light(finalLight)
+                    .normal(normal.x(), normal.y(), normal.z());
         }
     }
 
@@ -187,24 +187,10 @@ public final class TintingVertexConsumer implements VertexConsumer {
         return delegate.color(red * uniformTr, green * uniformTg, blue * uniformTb, alpha);
     }
 
-    @Override
-    public void vertex(float x, float y, float z,
-                       float red, float green, float blue, float alpha,
-                       float u, float v,
-                       int overlay, int light,
-                       float normalX, float normalY, float normalZ) {
-        if (fallbackBoost > 0) {
-            int blockLight = light & 0xFFFF;
-            int skyLight = (light >> 16) & 0xFFFF;
-            light = (skyLight << 16) | Math.max(blockLight, fallbackBoost);
-        }
-        delegate.vertex(x, y, z, red * uniformTr, green * uniformTg, blue * uniformTb, alpha, u, v, overlay, light, normalX, normalY, normalZ);
-    }
-
     // ---------------------------------------------------------- pass-through
 
     @Override
-    public VertexConsumer vertex(double x, double y, double z) {
+    public VertexConsumer vertex(float x, float y, float z) {
         return delegate.vertex(x, y, z);
     }
 
@@ -257,27 +243,7 @@ public final class TintingVertexConsumer implements VertexConsumer {
     }
 
     @Override
-    public VertexConsumer normal(Matrix3f matrix, float x, float y, float z) {
-        return delegate.normal(matrix, x, y, z);
-    }
-
-    @Override
-    public void fixedColor(int red, int green, int blue, int alpha) {
-        delegate.fixedColor(
-                (int) (red * uniformTr),
-                (int) (green * uniformTg),
-                (int) (blue * uniformTb),
-                alpha);
-    }
-
-    @Override
-    public void unfixColor() {
-        delegate.unfixColor();
-    }
-
-    @Override
-    public void next() {
-        delegate.next();
+    public VertexConsumer normal(MatrixStack.Entry entry, float x, float y, float z) {
+        return delegate.normal(entry, x, y, z);
     }
 }
-

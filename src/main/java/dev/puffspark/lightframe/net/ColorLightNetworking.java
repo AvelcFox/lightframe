@@ -5,9 +5,12 @@ import dev.puffspark.lightframe.engine.ColorLightSource;
 import dev.puffspark.lightframe.engine.EngineRegistry;
 import net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -21,12 +24,9 @@ import java.util.UUID;
 
 /**
  * Server -> client sync of source state (authoritative server model).
- * Fabric Networking v1 (PacketByteBuf payloads), 1.20.1 style.
+ * Fabric Networking v1 (CustomPayload records), 1.21.1 style.
  */
 public final class ColorLightNetworking {
-
-    public static final Identifier SYNC = LightFrame.id("sync");
-    public static final Identifier ACTION = LightFrame.id("action");
 
     public static final byte OP_ADD = 0;
     public static final byte OP_UPDATE = 1;
@@ -36,12 +36,42 @@ public final class ColorLightNetworking {
     public static final byte ACTION_SPAWN_DEBUG_LIGHT = 0;
     public static final byte ACTION_REMOVE_ALL = 1;
 
+    public record SyncPayload(byte[] data) implements CustomPayload {
+        public static final CustomPayload.Id<SyncPayload> ID = new CustomPayload.Id<>(LightFrame.id("sync"));
+        public static final PacketCodec<PacketByteBuf, SyncPayload> CODEC = CustomPayload.codecOf(
+                (value, buf) -> buf.writeByteArray(value.data()),
+                buf -> new SyncPayload(buf.readByteArray())
+        );
+
+        @Override
+        public Id<? extends CustomPayload> getId() {
+            return ID;
+        }
+    }
+
+    public record ActionPayload(byte action) implements CustomPayload {
+        public static final CustomPayload.Id<ActionPayload> ID = new CustomPayload.Id<>(LightFrame.id("action"));
+        public static final PacketCodec<PacketByteBuf, ActionPayload> CODEC = CustomPayload.codecOf(
+                (value, buf) -> buf.writeByte(value.action()),
+                buf -> new ActionPayload(buf.readByte())
+        );
+
+        @Override
+        public Id<? extends CustomPayload> getId() {
+            return ID;
+        }
+    }
+
     private ColorLightNetworking() {}
 
+    public static void initCommon() {
+        PayloadTypeRegistry.playS2C().register(SyncPayload.ID, SyncPayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(ActionPayload.ID, ActionPayload.CODEC);
+    }
+
     public static void registerServer() {
-        ServerPlayNetworking.registerGlobalReceiver(ACTION, (server, player, handler, buf, responseSender) -> {
-            byte action = buf.readByte();
-            server.execute(() -> handleAction(player, action));
+        ServerPlayNetworking.registerGlobalReceiver(ActionPayload.ID, (payload, context) -> {
+            context.server().execute(() -> handleAction(context.player(), payload.action()));
         });
 
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
@@ -82,7 +112,9 @@ public final class ColorLightNetworking {
         for (ColorLightSource s : all) {
             writeSource(buf, s);
         }
-        ServerPlayNetworking.send(player, SYNC, buf);
+        byte[] bytes = new byte[buf.readableBytes()];
+        buf.readBytes(bytes);
+        ServerPlayNetworking.send(player, new SyncPayload(bytes));
     }
 
     public static void broadcastAdd(ServerWorld world, ColorLightSource s) {
@@ -106,9 +138,12 @@ public final class ColorLightNetworking {
         broadcast(world, buf);
     }
 
-    private static void broadcast(ServerWorld world, PacketByteBuf payload) {
+    private static void broadcast(ServerWorld world, PacketByteBuf buf) {
+        byte[] bytes = new byte[buf.readableBytes()];
+        buf.readBytes(bytes);
+        SyncPayload payload = new SyncPayload(bytes);
         for (ServerPlayerEntity p : world.getPlayers()) {
-            ServerPlayNetworking.send(p, SYNC, new PacketByteBuf(payload.copy()));
+            ServerPlayNetworking.send(p, payload);
         }
     }
 
@@ -132,4 +167,3 @@ public final class ColorLightNetworking {
         return RegistryKey.of(RegistryKeys.WORLD, id);
     }
 }
-

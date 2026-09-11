@@ -83,8 +83,8 @@ public final class LightDebugRenderer {
         private static void line(VertexConsumer vc, Matrix4f mat,
                                  double x1, double y1, double z1, double x2, double y2, double z2,
                                  float r, float g, float b, float a) {
-            vc.vertex(mat, (float) x1, (float) y1, (float) z1).color(r, g, b, a).normal(0f, 1f, 0f).next();
-            vc.vertex(mat, (float) x2, (float) y2, (float) z2).color(r, g, b, a).normal(0f, 1f, 0f).next();
+            vc.vertex(mat, (float) x1, (float) y1, (float) z1).color(r, g, b, a).normal(0f, 1f, 0f);
+            vc.vertex(mat, (float) x2, (float) y2, (float) z2).color(r, g, b, a).normal(0f, 1f, 0f);
         }
     }
 }
