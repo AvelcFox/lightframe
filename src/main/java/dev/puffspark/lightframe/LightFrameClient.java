@@ -30,7 +30,6 @@ import java.util.UUID;
 public final class LightFrameClient implements ClientModInitializer {
 
     private static KeyBinding debugKey;
-    private static KeyBinding spawnKey;
 
     @Override
     public void onInitializeClient() {
@@ -70,8 +69,6 @@ public final class LightFrameClient implements ClientModInitializer {
 
         debugKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.lightframe.toggle_debug", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_K, "category.lightframe"));
-        spawnKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "key.lightframe.spawn_test_light", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_O, "category.lightframe"));
 
         LightDebugRenderer.register();
         DebugHud.register();
@@ -95,11 +92,6 @@ public final class LightFrameClient implements ClientModInitializer {
             ColorLightConfig cfg = ColorLightConfig.get();
             cfg.debugMode = !cfg.debugMode;
             ColorLightConfig.save();
-        }
-        while (spawnKey.wasPressed()) {
-            PacketByteBuf actionBuf = new PacketByteBuf(io.netty.buffer.Unpooled.buffer());
-            actionBuf.writeByte(ColorLightNetworking.ACTION_SPAWN_DEBUG_LIGHT);
-            ClientPlayNetworking.send(ColorLightNetworking.ACTION, actionBuf);
         }
 
         if (client.world != null) {

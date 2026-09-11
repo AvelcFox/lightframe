@@ -142,7 +142,7 @@ public final class ColorLightCommands {
     private static int clear(ServerCommandSource src) {
         int n = ColorLightAPI.count(src.getWorld());
         ColorLightAPI.removeAll(src.getWorld());
-        src.sendFeedback(() -> Text.literal("[Colored Lights] removed " + n + " source(s)"), false);
+        src.sendFeedback(() -> Text.literal("[LightFrame] removed " + n + " source(s)"), false);
         return n;
     }
 
@@ -151,13 +151,13 @@ public final class ColorLightCommands {
             var id = java.util.UUID.fromString(idArg);
             boolean ok = ColorLightAPI.remove(src.getWorld(), id);
             if (ok) {
-                src.sendFeedback(() -> Text.literal("[Colored Lights] removed " + id), false);
+                src.sendFeedback(() -> Text.literal("[LightFrame] removed " + id), false);
                 return 1;
             }
             src.sendError(Text.literal("No such source: " + id));
             return 0;
         } catch (IllegalArgumentException e) {
-            src.sendError(Text.literal("Id must be a UUID (see /LightFrame list)."));
+            src.sendError(Text.literal("Id must be a UUID (see /lightframe list)."));
             return 0;
         }
     }
@@ -165,12 +165,13 @@ public final class ColorLightCommands {
     private static int setDebug(ServerCommandSource src, boolean on) {
         ColorLightConfig.get().debugMode = on;
         ColorLightConfig.save();
-        src.sendFeedback(() -> Text.literal("[Colored Lights] debug " + (on ? "on" : "off")), false);
+        src.sendFeedback(() -> Text.literal("[LightFrame] debug " + (on ? "on" : "off")), false);
         return 1;
     }
 
-    /** Called from the debug keybind (client -> server ACTION packet). */
+    /** Called from debug action packet (admin only). */
     public static void spawnDebugLight(ServerWorld world, ServerPlayerEntity player) {
+        if (!player.hasPermissionLevel(2)) return;
         float[] cycle = {
                 1.0f, 0.0f, 0.0f,   // red
                 0.0f, 1.0f, 0.0f,   // green
@@ -186,7 +187,7 @@ public final class ColorLightCommands {
         pos = adjustToOpenAir(world, pos);
         ColorLight created = ColorLightAPI.create(world, pos, color, 8, 1.0f);
         if (created == null) {
-            player.sendMessage(Text.literal("[Colored Lights] source limit reached"), false);
+            player.sendMessage(Text.literal("[LightFrame] source limit reached"), false);
         }
     }
 

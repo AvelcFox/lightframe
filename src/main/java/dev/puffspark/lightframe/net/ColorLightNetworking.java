@@ -56,7 +56,7 @@ public final class ColorLightNetworking {
     private static void handleAction(ServerPlayerEntity player, byte action) {
         switch (action) {
             case ACTION_SPAWN_DEBUG_LIGHT -> {
-                if (player.getWorld() instanceof ServerWorld world) {
+                if (player.hasPermissionLevel(2) && player.getWorld() instanceof ServerWorld world) {
                     dev.puffspark.lightframe.command.ColorLightCommands.spawnDebugLight(world, player);
                 }
             }
