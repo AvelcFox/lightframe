@@ -28,7 +28,7 @@ dependencies {
 Or reference a local jar in `libs/`:
 ```groovy
 dependencies {
-    modImplementation files("libs/lightframe-0.2.0+1.21.1.jar")
+    modImplementation files("libs/lightframe-0.2.1+1.21.1.jar")
 }
 ```
 

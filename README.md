@@ -28,7 +28,7 @@ LightFrame brings **genuine multi-colored dynamic lighting** to Minecraft withou
 
 | Version | Branch | Status | Download |
 | :--- | :--- | :--- | :--- |
-| **Minecraft 1.21.1** | [`1.21.1`](https://github.com/AvelcFox/lightframe/tree/1.21.1) | 🟢 **Active / Latest** | [Download v0.2.0+1.21.1](releases/lightframe-0.2.0+1.21.1.jar) |
+| **Minecraft 1.21.1** | [`1.21.1`](https://github.com/AvelcFox/lightframe/tree/1.21.1) | 🟢 **Active / Latest** | [Download v0.2.1+1.21.1](releases/lightframe-0.2.1+1.21.1.jar) |
 | **Minecraft 1.20.1** | [`1.20.1`](https://github.com/AvelcFox/lightframe/tree/1.20.1) | 🟢 **LTS Supported** | [Download v0.1.0+1.20.1](releases/lightframe-0.1.0+1.20.1.jar) |
 | **Main / Docs** | [`main`](https://github.com/AvelcFox/lightframe/tree/main) | 📘 **Wiki, Issues & Roadmap** | — |
 | **Development** | [`dev`](https://github.com/AvelcFox/lightframe/tree/dev) | 🧪 **Experimental** | — |

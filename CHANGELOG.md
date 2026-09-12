@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.2.1+1.21.1] - 2026-09-13
+
+### Fixed
+* **Replay Mod & Paused State Lighting (Flashback / ReplayMod):**
+  * Fixed terrain and block colored lighting not rendering in replay recordings or when the game is paused.
+  * Added `MinecraftClientMixin` to process queued light propagation and flush dirty chunk section rebuilds on every rendered frame (`MinecraftClient.render`) even when regular client ticks are frozen.
+  * Fixed chunk section dirtying invoker mismatch in Sodium (`cl$scheduleChunkRender(x, y, z, boolean)`), ensuring entire 16x16x16 chunk sections are marked dirty for meshing.
+  * Added `EngineRegistry.clearSourcesLocal(world)` to properly reset stale light sources when seeking through timeline keyframes or receiving bulk sync packets in replays.
+
+---
+
 ## [0.2.0+1.21.1] - 2026-09-12
 
 ### Added
