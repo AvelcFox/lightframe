@@ -6,6 +6,7 @@
   "injectors": {
     "defaultRequire": 1
   },
+  "plugin": "dev.puffspark.lightframe.mixin.LightFrameMixinPlugin",
   "mixins": [
     "ChunkLightProviderMixin",
     "WorldBlockChangeMixin"
@@ -15,6 +16,7 @@
     "FluidRendererMixin",
     "EntityRenderDispatcherMixin",
     "BlockEntityRenderDispatcherMixin",
-    "WorldRendererAccessor"
+    "WorldRendererAccessor",
+    "sodium.SodiumBlockRendererMixin"
   ]
 }

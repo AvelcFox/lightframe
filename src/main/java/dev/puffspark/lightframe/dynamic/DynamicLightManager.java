@@ -28,7 +28,7 @@ public final class DynamicLightManager {
         public float intensity = 1.0f;
     }
 
-    private static final List<DynamicLight> ACTIVE_LIGHTS = new ArrayList<>(8);
+    private static volatile DynamicLight[] ACTIVE_LIGHTS = new DynamicLight[0];
     private static BlockPos lastPlayerBlock = null;
     private static int updateCooldown = 0;
 
@@ -37,12 +37,12 @@ public final class DynamicLightManager {
     public static void tick(MinecraftClient client) {
         ClientWorld world = client.world;
         if (world == null || client.player == null) {
-            ACTIVE_LIGHTS.clear();
+            ACTIVE_LIGHTS = new DynamicLight[0];
             lastPlayerBlock = null;
             return;
         }
 
-        ACTIVE_LIGHTS.clear();
+        List<DynamicLight> lightsList = new ArrayList<>(8);
 
         // Detect held colored torches on local player and nearby players
         for (AbstractClientPlayerEntity player : world.getPlayers()) {
@@ -59,16 +59,18 @@ public final class DynamicLightManager {
                 light.b = torchColor.getB();
                 light.radius = 10;
                 light.intensity = 1.0f;
-                ACTIVE_LIGHTS.add(light);
+                lightsList.add(light);
             }
         }
+
+        ACTIVE_LIGHTS = lightsList.isEmpty() ? new DynamicLight[0] : lightsList.toArray(new DynamicLight[0]);
 
         if (updateCooldown > 0) {
             updateCooldown--;
         }
 
         BlockPos currentBlock = client.player.getBlockPos();
-        boolean hasDynamic = !ACTIVE_LIGHTS.isEmpty();
+        boolean hasDynamic = ACTIVE_LIGHTS.length > 0;
 
         if (hasDynamic) {
             if (!currentBlock.equals(lastPlayerBlock) && updateCooldown <= 0) {
@@ -106,15 +108,14 @@ public final class DynamicLightManager {
      * Evaluates smooth Hermite falloff and screen-blends active dynamic lights.
      */
     public static boolean sampleDynamicLight(double vx, double vy, double vz, float[] outRgb, int[] outBoost) {
-        if (ACTIVE_LIGHTS.isEmpty()) return false;
+        DynamicLight[] lights = ACTIVE_LIGHTS;
+        if (lights.length == 0) return false;
 
         float dynR = 0.0f, dynG = 0.0f, dynB = 0.0f;
         int maxBoost = 0;
         boolean hit = false;
 
-        int count = ACTIVE_LIGHTS.size();
-        for (int i = 0; i < count; i++) {
-            DynamicLight light = ACTIVE_LIGHTS.get(i);
+        for (DynamicLight light : lights) {
             double dx = vx - light.x;
             double dy = vy - light.y;
             double dz = vz - light.z;
@@ -153,17 +154,17 @@ public final class DynamicLightManager {
     }
 
     public static boolean hasActiveLights() {
-        return !ACTIVE_LIGHTS.isEmpty();
+        return ACTIVE_LIGHTS.length > 0;
     }
 
     public static boolean isNearSection(int secX, int secY, int secZ) {
-        if (ACTIVE_LIGHTS.isEmpty()) return false;
+        DynamicLight[] lights = ACTIVE_LIGHTS;
+        if (lights.length == 0) return false;
         double secCenterX = (secX << 4) + 8.0;
         double secCenterY = (secY << 4) + 8.0;
         double secCenterZ = (secZ << 4) + 8.0;
 
-        for (int i = 0; i < ACTIVE_LIGHTS.size(); i++) {
-            DynamicLight light = ACTIVE_LIGHTS.get(i);
+        for (DynamicLight light : lights) {
             double dx = secCenterX - light.x;
             double dy = secCenterY - light.y;
             double dz = secCenterZ - light.z;
@@ -188,7 +189,7 @@ public final class DynamicLightManager {
     }
 
     public static void clear() {
-        ACTIVE_LIGHTS.clear();
+        ACTIVE_LIGHTS = new DynamicLight[0];
         lastPlayerBlock = null;
         updateCooldown = 0;
     }
