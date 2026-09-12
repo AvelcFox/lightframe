@@ -33,14 +33,20 @@ public final class ClientTorchScanner {
 
     private ClientTorchScanner() {}
 
+    private static int scanCooldown = 0;
+
     /**
-     * Ensures all already-loaded chunks around the camera are scanned when entering a world or replay.
+     * Periodically checks for newly loaded chunks around the camera (e.g. when replay chunks stream in).
      */
-    public static void ensureInitialScan(World world) {
+    public static void tick(World world) {
         if (world == null || !world.isClient()) return;
         if (lastScannedWorld != world) {
             lastScannedWorld = world;
             clear();
+            scanCooldown = 0;
+        }
+        if (--scanCooldown <= 0) {
+            scanCooldown = 15; // Rescan every ~15 frames for newly streamed chunks
             scanLoadedChunksAroundCamera(world);
         }
     }
@@ -59,7 +65,10 @@ public final class ClientTorchScanner {
 
         for (int dx = -viewDist; dx <= viewDist; dx++) {
             for (int dz = -viewDist; dz <= viewDist; dz++) {
-                net.minecraft.world.chunk.Chunk chunk = world.getChunk(cx + dx, cz + dz, ChunkStatus.FULL, false);
+                ChunkPos cpos = new ChunkPos(cx + dx, cz + dz);
+                if (CHUNK_TORCHES.containsKey(cpos)) continue;
+
+                net.minecraft.world.chunk.Chunk chunk = world.getChunk(cpos.x, cpos.z, ChunkStatus.FULL, false);
                 if (chunk instanceof WorldChunk wc) {
                     onChunkLoaded(world, wc);
                 }
@@ -73,6 +82,8 @@ public final class ClientTorchScanner {
         if (engine == null) return;
 
         ChunkPos cpos = chunk.getPos();
+        if (CHUNK_TORCHES.containsKey(cpos)) return;
+
         ChunkSection[] sections = chunk.getSectionArray();
         LongSet inThisChunk = new LongOpenHashSet();
 
@@ -115,6 +126,8 @@ public final class ClientTorchScanner {
 
         if (!inThisChunk.isEmpty()) {
             CHUNK_TORCHES.put(cpos, inThisChunk);
+        } else {
+            CHUNK_TORCHES.put(cpos, it.unimi.dsi.fastutil.longs.LongSets.EMPTY_SET);
         }
     }
 

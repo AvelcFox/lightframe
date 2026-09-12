@@ -118,8 +118,10 @@ public final class LightFrameClient implements ClientModInitializer {
         List<java.util.function.Consumer<World>> ops = new ArrayList<>();
         byte op = buf.readByte();
         if (op == ColorLightNetworking.OP_BULK) {
-            ops.add(world -> EngineRegistry.clearSourcesLocal(world));
             int n = buf.readVarInt();
+            if (n > 0) {
+                ops.add(world -> EngineRegistry.clearSourcesLocal(world));
+            }
             for (int i = 0; i < n; i++) {
                 ops.add(readSource(buf));
             }

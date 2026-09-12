@@ -85,6 +85,47 @@ public final class BlockLightManager {
         }
     }
 
+    public static void onChunkLoaded(ServerWorld world, net.minecraft.world.chunk.Chunk chunk) {
+        net.minecraft.world.chunk.ChunkSection[] sections = chunk.getSectionArray();
+        net.minecraft.util.math.ChunkPos cpos = chunk.getPos();
+        int startX = cpos.getStartX();
+        int startZ = cpos.getStartZ();
+
+        for (int sIndex = 0; sIndex < sections.length; sIndex++) {
+            net.minecraft.world.chunk.ChunkSection section = sections[sIndex];
+            if (section == null || section.isEmpty()) continue;
+
+            if (!section.hasAny(state -> state.getBlock() instanceof ColoredTorchBlock ||
+                                         state.getBlock() instanceof ColoredWallTorchBlock)) {
+                continue;
+            }
+
+            int secY = chunk.sectionIndexToCoord(sIndex);
+            int startY = secY << 4;
+
+            for (int y = 0; y < 16; y++) {
+                for (int z = 0; z < 16; z++) {
+                    for (int x = 0; x < 16; x++) {
+                        net.minecraft.block.BlockState state = section.getBlockState(x, y, z);
+                        TorchColor color = null;
+                        if (state.getBlock() instanceof ColoredTorchBlock torch) {
+                            color = torch.getTorchColor();
+                        } else if (state.getBlock() instanceof ColoredWallTorchBlock wallTorch) {
+                            color = wallTorch.getTorchColor();
+                        }
+
+                        if (color != null) {
+                            BlockPos pos = new BlockPos(startX + x, startY + y, startZ + z);
+                            if (!hasTorch(world, pos)) {
+                                onTorchPlaced(world, pos, color);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     public static class TorchPersistentState extends PersistentState {
         public static final Type<TorchPersistentState> TYPE = new Type<>(
                 TorchPersistentState::new,

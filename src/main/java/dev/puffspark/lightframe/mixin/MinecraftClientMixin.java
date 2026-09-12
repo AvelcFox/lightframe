@@ -25,7 +25,7 @@ public class MinecraftClientMixin {
     @Inject(method = "render", at = @At("HEAD"))
     private void cl$onFrameRender(boolean tick, CallbackInfo ci) {
         if (this.world != null) {
-            dev.puffspark.lightframe.block.ClientTorchScanner.ensureInitialScan(this.world);
+            dev.puffspark.lightframe.block.ClientTorchScanner.tick(this.world);
             RGBLightEngine engine = EngineRegistry.engineOrNull(this.world);
             if (engine != null && engine.queuedOps() > 0) {
                 engine.tick();

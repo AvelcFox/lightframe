@@ -62,6 +62,7 @@ public final class LightFrame implements ModInitializer {
             if (engine != null && engine.sources().size() > 0) {
                 engine.onChunkLoaded(chunk.getPos().x, chunk.getPos().z);
             }
+            dev.puffspark.lightframe.block.BlockLightManager.onChunkLoaded(world, chunk);
         });
 
         ServerWorldEvents.UNLOAD.register((server, world) -> EngineRegistry.onWorldUnload(world));
