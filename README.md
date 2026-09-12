@@ -1,78 +1,78 @@
 # LightFrame 💡🎨
-**Настоящее динамическое RGB-освещение для Minecraft (Fabric 1.20.1 & 1.21.1)**
+**True Dynamic RGB Lighting Engine for Minecraft (Fabric 1.20.1 & 1.21.1)**
 
-LightFrame — это высокопроизводительный Fabric-мод, добавляющий в Minecraft **честное многоцветное освещение** поверх стандартного графического конвейера. Источники света обладают цветом, интенсивностью и радиусом, окрашивают блоки мира и сущностей, а несколько разноцветных лучей плавно смешиваются в пространстве (например, красный + синий дают фиолетовое свечение).
+LightFrame brings **genuine multi-colored dynamic lighting** to Minecraft without requiring heavy shaderpacks. Light sources have customizable color, intensity, and radius, physically coloring blocks and entities. Multiple light sources seamlessly blend in real time (e.g., placing red and blue lights together creates a natural purple illumination).
 
-> ⚠️ **Важное примечание:** Мод находится в активной разработке. Автор не гарантирует абсолютную стабильность на абсолютно любых комбинациях сторонних модов и сборок. Перед использованием в важных мирах рекомендуется делать резервные копии.
-
----
-
-## ✨ Ключевые особенности
-
-* 🌟 **Чистый Vanilla Graphics Support** — для работы мода **не требуются** шейдеры или OptiFine/Iris. Цветной свет работает на стандартном графическом движке игры.
-* ⚡ **Совместимость с Sodium & Iris (начиная с v0.2.0)** — встроенный хук в пайплайн компиляции чанков Sodium обеспечивает полноценное освещение блоков и высокую частоту кадров.
-* 🔦 **Динамический свет в руках** — держа цветной факел в главной или второй руке, вы освещаете путь вокруг себя на ходу без задержек и лагов.
-* 🕯️ **16 оттенков факелов** — полноценные цветные факелы для каждого ванильного красителя с возможностью установки на пол и стены, анимацией пламени и цветными искрами.
-* 👥 **Окрашивание сущностей и мобов** — мобы, игроки, броня и лежащие на земле предметы окрашиваются окружающим цветным светом.
-* 🌈 **Физическое смешивание цветов** — собственный алгоритм распространения света (BFS по каналам R, G, B с затуханием через прозрачные и полупрозрачные блоки).
-* ⚙️ **Двухканальная модель освещения** — свет не только окрашивает текстуры через умножение вертексных цветов, но и усиливает яркость в лайтмапе, делая цветное пламя видимым в полной темноте.
-* 🛠️ **ColorLight API** — простой и удобный Java API для разработчиков других модов.
-* 📊 **Инструменты отладки** — встроенный экранный HUD и 3D-визуализация радиусов источников (клавиша `K`).
+> ⚠️ **Disclaimer:** LightFrame is currently in active development. The author does not guarantee flawless compatibility across every third-party modpack or custom mod setup. Please back up your worlds regularly.
 
 ---
 
-## 📦 Доступные версии
+## ✨ Features
 
-| Версия мода | Версия Minecraft | Поддержка рендереров | Ссылка на файл |
+* 🌟 **Pure Vanilla Graphics Support** — No shaders, OptiFine, or Iris required! The colored lighting engine operates directly on top of Minecraft's native rendering pipeline.
+* ⚡ **Sodium & Iris Compatibility (v0.2.0+)** — Native chunk meshing pipeline integration for Sodium. Enjoy full block colored lighting with maximum frame rates.
+* 🔦 **Dynamic Handheld Lighting** — Hold a colored torch in your main hand or off-hand to illuminate your path smoothly as you move, with zero lag or stutter.
+* 🕯️ **16 Colored Torches** — Craftable torches for every vanilla dye color with floor and wall variants, authentic flame animations, and colored spark particles.
+* 👥 **Entity & Mob Tinting** — Mobs, players, armor, and dropped items reflect the surrounding colored light.
+* 🌈 **Physical Color Mixing** — Advanced BFS light propagation across red, green, and blue channels with smooth falloff and block translucency calculations.
+* ⚙️ **Two-Tier Lighting Model** — Simultaneously applies vertex color multipliers and vanilla lightmap boosting, ensuring vibrant colors remain visible even in pitch-black caves.
+* 🛠️ **Developer API** — Clean and simple Java API (`ColorLightAPI`) for third-party mod integration.
+* 📊 **Built-In Debug Tools** — Toggleable on-screen HUD and 3D light sphere visualization (press `K`).
+
+---
+
+## 📦 Available Releases
+
+| Mod Version | Minecraft Version | Graphics Pipeline | Download |
 |---|---|---|---|
 | **0.2.0** | **1.21.1** | **Vanilla + Sodium + Iris** | [releases/lightframe-0.2.0+1.21.1.jar](releases/lightframe-0.2.0+1.21.1.jar) |
-| **0.1.0** | **1.21.1** | **Только Vanilla** (без Sodium) | [releases/lightframe-0.1.0+1.21.1.jar](releases/lightframe-0.1.0+1.21.1.jar) |
-| **0.1.0** | **1.20.1** | **Только Vanilla** | [releases/lightframe-0.1.0+1.20.1.jar](releases/lightframe-0.1.0+1.20.1.jar) |
+| **0.1.0** | **1.21.1** | **Vanilla Only** (without Sodium) | [releases/lightframe-0.1.0+1.21.1.jar](releases/lightframe-0.1.0+1.21.1.jar) |
+| **0.1.0** | **1.20.1** | **Vanilla Only** | [releases/lightframe-0.1.0+1.20.1.jar](releases/lightframe-0.1.0+1.20.1.jar) |
 
 ---
 
-## 🛠️ Крафт цветных факелов
+## 🛠️ Crafting Recipes
 
-Каждый факел создаётся в верстаке или сетке инвентаря:
-* **1 ванильный факел** + **1 краситель** нужного цвета = **1 цветной факел**.
+Craft any colored torch right in your inventory or crafting table:
+* **1 Vanilla Torch** + **1 Dye (any color)** ➔ **1 Colored Torch**
 
-Доступны все 16 цветов: белый, оранжевый, пурпурный, светло-синий, жёлтый, лаймовый, розовый, серый, светло-серый, бирюзовый, фиолетовый, синий, коричневый, зелёный, красный и чёрный.
+Available in all 16 Minecraft colors: White, Orange, Magenta, Light Blue, Yellow, Lime, Pink, Gray, Light Gray, Cyan, Purple, Blue, Brown, Green, Red, and Black.
 
 ---
 
-## 🎮 Команды и управление
+## 🎮 Commands & Controls
 
-### Клавиши
-* **`K`** — включить / выключить оверлей отладки (HUD с FPS, счётчиками источников и визуализацией сфер света).
+### Keybinds
+* **`K`** — Toggle debug overlay (shows active lights count, FPS, dirty sections, and 3D light radius wireframes).
 
-### Команды (требуют прав оператора / ОП уровня 2)
+### Operator Commands (Permission Level 2 required)
 ```bash
-# Создать точечный источник перед глазами игрока:
-/create_light <цвет> [радиус] [интенсивность]
+# Create a point light source in front of your crosshair:
+/create_light <color> [radius] [intensity]
 
-# Список всех активных источников в текущем измерении:
+# List all active light sources in the current dimension:
 /lightframe list
 
-# Удалить источник по его UUID:
+# Remove a specific light source:
 /lightframe remove <uuid>
 
-# Очистить все источники в мире:
+# Clear all light sources in the current world:
 /lightframe clear
 
-# Перезагрузить конфигурационный файл:
+# Reload configuration from disk:
 /lightframe reload
 
-# Включить/выключить режим отладки:
+# Toggle debug mode:
 /lightframe debug on|off
 ```
 
-> **Формат цвета:** можно использовать названия (`red`, `green`, `blue`, `white`, `purple`, `yellow`, `cyan`, `orange`, `pink`) или HEX-код (`#ff00aa`).
+> **Color formats:** Use color names (`red`, `green`, `blue`, `white`, `purple`, `yellow`, `cyan`, `orange`, `pink`) or hex codes (`#ff00aa`).
 
 ---
 
-## ⚙️ Конфигурация (`config/LightFrame.json`)
+## ⚙️ Configuration (`config/LightFrame.json`)
 
-Файл настроек создаётся автоматически при первом запуске:
+The config file is generated automatically on first launch:
 
 ```json
 {
@@ -94,43 +94,43 @@ LightFrame — это высокопроизводительный Fabric-мод
 }
 ```
 
-* **`enableRGBLighting`** — мастер-переключатель всей системы цветного света.
-* **`tintStrength`** (от 0.0 до 1.0) — насыщенность наложения цвета на текстуры.
-* **`tintEntities`** — включение окрашивания мобов и игроков.
-* **`boostVanillaLight`** — подмешивание яркости в ванильный лайтмап (позволяет видеть в темноте).
-* **`updateBudget`** — ограничение времени (в миллисекундах) на расчёт света за тик.
-
 ---
 
-## 💻 Для разработчиков (ColorLight API)
+## 💻 Developer API (`ColorLightAPI`)
 
-Добавьте зависимость на LightFrame и управляйте источниками из своего мода:
+Easily spawn and manage custom colored lights from your own mod:
 
 ```java
 import dev.puffspark.lightframe.api.ColorLightAPI;
 import dev.puffspark.lightframe.api.ColorLight;
 import dev.puffspark.lightframe.api.LightColor;
 
-// Создать источник света в мире:
+// Spawn a colored light source in the world:
 ColorLight light = ColorLightAPI.create(world, pos, LightColor.RED, 10, 1.0f);
 
-// Динамически изменить параметры:
+// Dynamically adjust properties:
 light.setColor(LightColor.PURPLE);
 light.setIntensity(1.5f);
 light.setPosition(newPos);
 
-// Временно отключить или удалить:
+// Temporarily disable or delete:
 light.setEnabled(false);
 light.remove();
 ```
 
-* Источники, созданные на сервере, автоматически синхронизируются со всеми клиентами в радиусе видимости.
-* Источники, созданные на стороне клиента, работают как локальные визуальные эффекты.
+---
+
+## 📋 Requirements
+
+* **Minecraft:** `1.20.1` or `1.21.1`
+* **Fabric Loader:** `>=0.16.0`
+* **Fabric API:** Required
+* **Side:** Client: `Required` | Server: `Required` (for multiplayer torch sync)
 
 ---
 
-## 👥 Команда и лицензия
+## 👥 Credits & License
 
-* **Разработчик:** Avelc
-* **Команда:** PuffSpark
-* **Лицензия:** [GNU Lesser General Public License v3.0 or later (LGPL-3.0-or-later)](LICENSE)
+* **Developer:** Avelc
+* **Team:** PuffSpark
+* **License:** [GNU Lesser General Public License v3.0 or later (LGPL-3.0-or-later)](LICENSE)
