@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(value = BlockRenderer.class, remap = false)
 public abstract class SodiumBlockRendererMixin extends AbstractBlockRenderContext {
 
-    @Inject(method = "processQuad", at = @At(value = "INVOKEVIRTUAL", target = "Lnet/caffeinemc/mods/sodium/client/render/chunk/compile/pipeline/BlockRenderer;bufferQuad(Lnet/caffeinemc/mods/sodium/client/render/frapi/mesh/MutableQuadViewImpl;[FLnet/caffeinemc/mods/sodium/client/render/chunk/terrain/material/Material;)V"), remap = false)
+    @Inject(method = "processQuad", at = @At(value = "INVOKE", target = "Lnet/caffeinemc/mods/sodium/client/render/chunk/compile/pipeline/BlockRenderer;bufferQuad(Lnet/caffeinemc/mods/sodium/client/render/frapi/mesh/MutableQuadViewImpl;[FLnet/caffeinemc/mods/sodium/client/render/chunk/terrain/material/Material;)V"), remap = false)
     private void cl$tintSodiumQuad(MutableQuadViewImpl quad, CallbackInfo ci) {
         if (!VanillaLightingBackend.tintActive()) return;
         World world = MinecraftClient.getInstance().world;
