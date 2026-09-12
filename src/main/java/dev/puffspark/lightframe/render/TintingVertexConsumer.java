@@ -102,10 +102,10 @@ public final class TintingVertexConsumer implements VertexConsumer {
             float u = Float.intBitsToFloat(vertexData[off + 4]);
             float v = Float.intBitsToFloat(vertexData[off + 5]);
 
-            int blockLight = light & 0xFFFF;
+            int blockLight = (light & 0xFFFF) >> 4;
             int skyLight = (light >> 16) & 0xFFFF;
             int finalBlockLight = Math.max(blockLight, boost);
-            int finalLight = (skyLight << 16) | finalBlockLight;
+            int finalLight = (skyLight << 16) | (finalBlockLight << 4);
 
             Vector4f worldPos = posMat.transform(new Vector4f(vx, vy, vz, 1.0f));
             delegate.vertex(worldPos.x(), worldPos.y(), worldPos.z())
@@ -158,10 +158,10 @@ public final class TintingVertexConsumer implements VertexConsumer {
             float v = Float.intBitsToFloat(vertexData[off + 5]);
 
             int vertexLight = lights[k];
-            int blockLight = vertexLight & 0xFFFF;
+            int blockLight = (vertexLight & 0xFFFF) >> 4;
             int skyLight = (vertexLight >> 16) & 0xFFFF;
             int finalBlockLight = Math.max(blockLight, boost);
-            int finalLight = (skyLight << 16) | finalBlockLight;
+            int finalLight = (skyLight << 16) | (finalBlockLight << 4);
 
             Vector4f worldPos = posMat.transform(new Vector4f(vx, vy, vz, 1.0f));
             delegate.vertex(worldPos.x(), worldPos.y(), worldPos.z())
@@ -176,9 +176,9 @@ public final class TintingVertexConsumer implements VertexConsumer {
     @Override
     public VertexConsumer color(int red, int green, int blue, int alpha) {
         return delegate.color(
-                (int) (red * uniformTr),
-                (int) (green * uniformTg),
-                (int) (blue * uniformTb),
+                Math.min(255, Math.max(0, Math.round(red * uniformTr))),
+                Math.min(255, Math.max(0, Math.round(green * uniformTg))),
+                Math.min(255, Math.max(0, Math.round(blue * uniformTb))),
                 alpha);
     }
 
@@ -201,7 +201,11 @@ public final class TintingVertexConsumer implements VertexConsumer {
 
     @Override
     public VertexConsumer color(int argb) {
-        return delegate.color(argb);
+        int a = (argb >> 24) & 0xFF;
+        int r = Math.min(255, Math.max(0, Math.round(((argb >> 16) & 0xFF) * uniformTr)));
+        int g = Math.min(255, Math.max(0, Math.round(((argb >> 8) & 0xFF) * uniformTg)));
+        int b = Math.min(255, Math.max(0, Math.round((argb & 0xFF) * uniformTb)));
+        return delegate.color((a << 24) | (r << 16) | (g << 8) | b);
     }
 
     @Override
@@ -222,9 +226,9 @@ public final class TintingVertexConsumer implements VertexConsumer {
     @Override
     public VertexConsumer light(int uv) {
         if (fallbackBoost > 0) {
-            int blockLight = uv & 0xFFFF;
-            int skyLight = (uv >> 16) & 0xFFFF;
-            uv = (skyLight << 16) | Math.max(blockLight, fallbackBoost);
+            int blockLight = (uv & 0xFFFF) >> 4;
+            int newBlock = Math.max(blockLight, fallbackBoost);
+            uv = (uv & 0xFFFF0000) | (newBlock << 4);
         }
         return delegate.light(uv);
     }
@@ -232,7 +236,8 @@ public final class TintingVertexConsumer implements VertexConsumer {
     @Override
     public VertexConsumer light(int u, int v) {
         if (fallbackBoost > 0) {
-            u = Math.max(u, fallbackBoost);
+            int currentBlock = u >> 4;
+            u = Math.max(currentBlock, fallbackBoost) << 4;
         }
         return delegate.light(u, v);
     }
