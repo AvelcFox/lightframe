@@ -23,17 +23,10 @@ This document tracks current milestones, planned features, and community task re
 
 ## 🔨 In Progress & Planned (v0.3.0)
 
-- [ ] **Visual GUI Editor:**
-  - In-game HUD/screen to pick colors with a color wheel instead of typing HEX values.
-  - Sliders for radius and intensity.
 - [ ] **Custom Item Wand / Light Tool:**
   - A builder wand item allowing right-click to place, inspect, or configure lights easily in Creative mode.
 - [ ] **Volumetric & Directional Light Beams:**
   - Support for spotlights / directional emission angles (e.g. stage spotlights).
-- [ ] **Performance & Level-of-Detail (LOD):**
-  - Occlusion culling for distant light sources behind solid walls.
-- [ ] **Minecraft 1.21.4+ Support:**
-  - Keep compatibility updated for newer minor versions of Minecraft 1.21.
 
 ---
 

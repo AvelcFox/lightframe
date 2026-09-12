@@ -100,11 +100,6 @@ Commands require Operator permissions (**level 2+**):
 ## 🗺️ Project Roadmap & Tasks
 
 Track planned features, progress, and milestones in **[ROADMAP.md](ROADMAP.md)**:
-- [x] Core RGB lighting engine (v0.1.0)
-- [x] Sodium 0.8+ chunk quad compatibility (v0.2.0)
-- [ ] In-game GUI editor with color wheel (v0.3.0)
-- [ ] Creative Mode builder wand tool
-- [ ] Support for upcoming Minecraft versions
 
 ---
 
