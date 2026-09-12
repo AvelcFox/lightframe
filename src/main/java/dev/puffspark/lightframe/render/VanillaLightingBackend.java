@@ -311,9 +311,11 @@ public final class VanillaLightingBackend {
         MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.worldRenderer == null || mc.world != world) return;
         BlockPos raw = BlockPos.fromLong(sectionKey);
-        // raw is the block position of the section origin; scheduleSectionRender converts to section coords internally
+        int secX = raw.getX() >> 4;
+        int secY = raw.getY() >> 4;
+        int secZ = raw.getZ() >> 4;
         ((dev.puffspark.lightframe.mixin.WorldRendererAccessor) mc.worldRenderer)
-                .cl$scheduleSectionRender(raw, true);
+                .cl$scheduleChunkRender(secX, secY, secZ, true);
     }
 }
 

@@ -115,6 +115,7 @@ public final class LightFrameClient implements ClientModInitializer {
         List<java.util.function.Consumer<World>> ops = new ArrayList<>();
         byte op = buf.readByte();
         if (op == ColorLightNetworking.OP_BULK) {
+            ops.add(world -> EngineRegistry.clearSourcesLocal(world));
             int n = buf.readVarInt();
             for (int i = 0; i < n; i++) {
                 ops.add(readSource(buf));
@@ -147,6 +148,17 @@ public final class LightFrameClient implements ClientModInitializer {
         if (client.world == null) return;
         for (java.util.function.Consumer<World> op : ops) {
             op.accept(client.world);
+        }
+
+        // In replays (Flashback/ReplayMod) or when paused, client ticks are frozen.
+        // Process queued light ops and flush dirty sections immediately so chunk meshes rebuild!
+        var engine = EngineRegistry.engineOrNull(client.world);
+        if (engine != null && engine.queuedOps() > 0) {
+            engine.tick();
+        }
+        var listener = ClientEngineListener.current();
+        if (listener != null) {
+            listener.flushAll();
         }
     }
 }

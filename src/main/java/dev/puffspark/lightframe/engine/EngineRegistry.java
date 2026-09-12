@@ -195,6 +195,17 @@ public final class EngineRegistry {
         }
     }
 
+    /** Clears all local sources in the given world (client-side, e.g. on bulk sync / dimension reset / replay seek). */
+    public static void clearSourcesLocal(World world) {
+        RGBLightEngine e = engineOrNull(world);
+        if (e == null) return;
+        List<ColorLightSource> doomed = new ArrayList<>(e.sources().all());
+        for (ColorLightSource s : doomed) {
+            s.alive = false;
+            e.sourceRemoved(s);
+        }
+    }
+
     // ------------------------------------------------------------------ hot paths (mixins)
 
     /** Vanilla block-light boost (0..15) at the position; O(1), early-outs on empty storage. */

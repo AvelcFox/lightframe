@@ -95,9 +95,8 @@ public final class DynamicLightManager {
         for (int dy = -1; dy <= 1; dy++) {
             for (int dz = -1; dz <= 1; dz++) {
                 for (int dx = -1; dx <= 1; dx++) {
-                    BlockPos pos = new BlockPos((cx + dx) << 4, (cy + dy) << 4, (cz + dz) << 4);
                     ((dev.puffspark.lightframe.mixin.WorldRendererAccessor) mc.worldRenderer)
-                            .cl$scheduleSectionRender(pos, false);
+                            .cl$scheduleChunkRender(cx + dx, cy + dy, cz + dz, false);
                 }
             }
         }

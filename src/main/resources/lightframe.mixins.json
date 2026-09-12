@@ -17,6 +17,7 @@
     "EntityRenderDispatcherMixin",
     "BlockEntityRenderDispatcherMixin",
     "WorldRendererAccessor",
+    "MinecraftClientMixin",
     "sodium.SodiumBlockRendererMixin"
   ]
 }

@@ -105,7 +105,6 @@ public final class ColorLightNetworking {
         for (dev.puffspark.lightframe.api.ColorLight l : EngineRegistry.getAllSources(world)) {
             all.add((ColorLightSource) l);
         }
-        if (all.isEmpty()) return;
         PacketByteBuf buf = PacketByteBufs.create();
         buf.writeByte(OP_BULK);
         buf.writeVarInt(all.size());

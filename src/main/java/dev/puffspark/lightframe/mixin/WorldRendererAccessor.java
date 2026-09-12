@@ -15,5 +15,8 @@ public interface WorldRendererAccessor {
 
     @Invoker("scheduleSectionRender")
     void cl$scheduleSectionRender(BlockPos pos, boolean important);
+
+    @Invoker("scheduleChunkRender")
+    void cl$scheduleChunkRender(int x, int y, int z, boolean important);
 }
 
