@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📖 LightFrame Documentation & Wiki
+    url: https://github.com/AvelcFox/lightframe/tree/main/docs
+    about: Read the API guide, command syntax, configuration options, and FAQ before reporting issues.
+  - name: 📦 Modrinth Project Page
+    url: https://modrinth.com/mod/lightframe
+    about: Download releases and check update changelogs on Modrinth.

@@ -1,0 +1,43 @@
+name: 💡 Feature Request
+description: Suggest an idea or new feature for LightFrame
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have an idea for a new feature, mechanic, or improvement in LightFrame? We'd love to hear it!
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Is your feature request related to a problem?
+      description: A clear and concise description of what the limitation or problem is.
+      placeholder: "I'm always frustrated when..."
+    validations:
+      required: false
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Describe the proposed solution or feature
+      description: A detailed description of what you want to happen.
+      placeholder: "Add a visual GUI or an item tool to configure lights without commands..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Describe alternatives you've considered
+      description: Any alternative solutions or features you've thought about.
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: Additional Context
+      description: Add any other context, screenshots, or mockups about the feature request here.
+    validations:
+      required: false

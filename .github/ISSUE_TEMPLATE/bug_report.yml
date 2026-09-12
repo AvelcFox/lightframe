@@ -1,0 +1,101 @@
+name: 🐛 Bug Report
+description: Report a reproducible bug or crash in LightFrame
+title: "[Bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for taking the time to report an issue with LightFrame!
+        Please fill out this form as accurately as possible to help us diagnose and fix the problem quickly.
+
+  - type: dropdown
+    id: mc_version
+    attributes:
+      label: Minecraft Version
+      description: Which version of Minecraft are you playing?
+      options:
+        - "1.21.1"
+        - "1.20.1"
+        - "Other (specify below)"
+    validations:
+      required: true
+
+  - type: input
+    id: mod_version
+    attributes:
+      label: LightFrame Version
+      description: What version of LightFrame are you using? (e.g. 0.2.0+1.21.1)
+      placeholder: "e.g. 0.2.0+1.21.1"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: mod_loader
+    attributes:
+      label: Mod Loader
+      options:
+        - "Fabric Loader"
+        - "Quilt Loader"
+        - "Other"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: graphics_mods
+    attributes:
+      label: Performance / Graphics Mods Installed
+      description: Are you using Sodium, Iris, or shaders?
+      options:
+        - "Vanilla (No graphics mods)"
+        - "Sodium only"
+        - "Sodium + Iris Shaders"
+        - "Other (Embeddium, Canvas, etc.)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description of the Bug
+      description: A clear and concise description of what the bug is.
+      placeholder: "When I place a light source at..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps_to_reproduce
+    attributes:
+      label: Steps to Reproduce
+      description: How can we reproduce the issue?
+      placeholder: |
+        1. Run command '/lightframe create ...'
+        2. Walk away 16 blocks
+        3. Observe visual glitch...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Crash Report or Logs
+      description: Please paste the crash report or `latest.log` via [mclo.gs](https://mclo.gs/) or in a code block.
+      render: text
+    validations:
+      required: false
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots / Videos
+      description: Drag and drop screenshots or paste links if applicable.
+    validations:
+      required: false
