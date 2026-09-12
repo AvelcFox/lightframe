@@ -21,16 +21,6 @@ LightFrame brings **genuine multi-colored dynamic lighting** to Minecraft withou
 
 ---
 
-## 📦 Available Releases
-
-| Mod Version | Minecraft Version | Graphics Pipeline | Download |
-|---|---|---|---|
-| **0.2.0** | **1.21.1** | **Vanilla + Sodium + Iris** | [releases/lightframe-0.2.0+1.21.1.jar](releases/lightframe-0.2.0+1.21.1.jar) |
-| **0.1.0** | **1.21.1** | **Vanilla Only** (without Sodium) | [releases/lightframe-0.1.0+1.21.1.jar](releases/lightframe-0.1.0+1.21.1.jar) |
-| **0.1.0** | **1.20.1** | **Vanilla Only** | [releases/lightframe-0.1.0+1.20.1.jar](releases/lightframe-0.1.0+1.20.1.jar) |
-
----
-
 ## 🛠️ Crafting Recipes
 
 Craft any colored torch right in your inventory or crafting table:
@@ -117,15 +107,6 @@ light.setPosition(newPos);
 light.setEnabled(false);
 light.remove();
 ```
-
----
-
-## 📋 Requirements
-
-* **Minecraft:** `1.20.1` or `1.21.1`
-* **Fabric Loader:** `>=0.16.0`
-* **Fabric API:** Required
-* **Side:** Client: `Required` | Server: `Required` (for multiplayer torch sync)
 
 ---
 
