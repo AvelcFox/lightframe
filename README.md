@@ -1,9 +1,9 @@
 # LightFrame 💡🎨
-**True Dynamic RGB Lighting Engine for Minecraft (Fabric 1.20.1 & 1.21.1)**
+**True Dynamic RGB Lighting Engine for Minecraft**
 
 LightFrame brings **genuine multi-colored dynamic lighting** to Minecraft without requiring heavy shaderpacks. Light sources have customizable color, intensity, and radius, physically coloring blocks and entities. Multiple light sources seamlessly blend in real time (e.g., placing red and blue lights together creates a natural purple illumination).
 
-> ⚠️ **Disclaimer:** LightFrame is currently in active development. The author does not guarantee flawless compatibility across every third-party modpack or custom mod setup. Please back up your worlds regularly.
+> ⚠️ **Disclaimer:** LightFrame is currently in development. The author does not guarantee flawless compatibility across every third-party modpack or custom mod setup. Please back up your worlds regularly.
 
 ---
 
@@ -112,6 +112,6 @@ light.remove();
 
 ## 👥 Credits & License
 
-* **Developer:** Avelc
+* **Developer:** AvelcFox
 * **Team:** PuffSpark
 * **License:** [GNU Lesser General Public License v3.0 or later (LGPL-3.0-or-later)](LICENSE)
