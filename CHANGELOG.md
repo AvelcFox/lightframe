@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * Fixed terrain and block colored lighting not rendering in replay recordings or when the game is paused.
   * Added `MinecraftClientMixin` to process queued light propagation and flush dirty chunk section rebuilds on every rendered frame (`MinecraftClient.render`) even when regular client ticks are frozen.
   * Fixed chunk section dirtying invoker mismatch in Sodium (`cl$scheduleChunkRender(x, y, z, boolean)`), ensuring entire 16x16x16 chunk sections are marked dirty for meshing.
+  * Added `ClientTorchScanner` to automatically detect placed colored torches in chunk sections (`ChunkSection.hasAny(...)`) and timeline scrubbing, allowing torches placed on the map to emit full colored lighting in offline replays and camera flybys without requiring server-side sync.
+  * Increased default `maxLightSources` limit from 128 to 512 for large scenes and cinematic recording.
   * Added `EngineRegistry.clearSourcesLocal(world)` to properly reset stale light sources when seeking through timeline keyframes or receiving bulk sync packets in replays.
 
 ---

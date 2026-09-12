@@ -53,6 +53,7 @@ public final class LightFrameClient implements ClientModInitializer {
 
         net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.DISCONNECT
                 .register((handler, client) -> {
+                    dev.puffspark.lightframe.block.ClientTorchScanner.clear();
                     dev.puffspark.lightframe.dynamic.DynamicLightManager.clear();
                     EngineRegistry.clearClientEngines();
                     var listener = ClientEngineListener.current();
@@ -62,10 +63,12 @@ public final class LightFrameClient implements ClientModInitializer {
         ClientChunkEvents.CHUNK_UNLOAD.register((world, chunk) -> {
             var engine = EngineRegistry.engineOrNull(world);
             if (engine != null) engine.onChunkUnload(chunk.getPos().x, chunk.getPos().z);
+            dev.puffspark.lightframe.block.ClientTorchScanner.onChunkUnloaded(world, chunk.getPos().x, chunk.getPos().z);
         });
         ClientChunkEvents.CHUNK_LOAD.register((world, chunk) -> {
             var engine = EngineRegistry.engineOrNull(world);
             if (engine != null && engine.sources().size() > 0) engine.onChunkLoaded(chunk.getPos().x, chunk.getPos().z);
+            dev.puffspark.lightframe.block.ClientTorchScanner.onChunkLoaded(world, (net.minecraft.world.chunk.WorldChunk) chunk);
         });
 
         debugKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(

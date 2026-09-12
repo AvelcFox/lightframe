@@ -27,16 +27,24 @@ public class ColoredWallTorchBlock extends WallTorchBlock {
     @SuppressWarnings("deprecation")
     public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify) {
         super.onBlockAdded(state, world, pos, oldState, notify);
-        if (!world.isClient() && !oldState.isOf(state.getBlock())) {
-            BlockLightManager.onTorchPlaced(world, pos, torchColor);
+        if (!oldState.isOf(state.getBlock())) {
+            if (world.isClient()) {
+                ClientTorchScanner.registerTorch(world, pos, torchColor);
+            } else {
+                BlockLightManager.onTorchPlaced(world, pos, torchColor);
+            }
         }
     }
 
     @Override
     @SuppressWarnings("deprecation")
     public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
-        if (!world.isClient() && !state.isOf(newState.getBlock())) {
-            BlockLightManager.onTorchRemoved(world, pos);
+        if (!state.isOf(newState.getBlock())) {
+            if (world.isClient()) {
+                ClientTorchScanner.removeTorch(world, pos);
+            } else {
+                BlockLightManager.onTorchRemoved(world, pos);
+            }
         }
         super.onStateReplaced(state, world, pos, newState, moved);
     }

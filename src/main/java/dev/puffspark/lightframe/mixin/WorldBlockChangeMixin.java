@@ -27,6 +27,18 @@ public abstract class WorldBlockChangeMixin {
         World world = (World) (Object) this;
         RGBLightEngine engine = EngineRegistry.engineOrNull(world);
         if (engine == null) return;
+        if (world.isClient()) {
+            if (state.getBlock() instanceof dev.puffspark.lightframe.block.ColoredTorchBlock torch) {
+                dev.puffspark.lightframe.block.ClientTorchScanner.registerTorch(world, pos, torch.getTorchColor());
+                return;
+            } else if (state.getBlock() instanceof dev.puffspark.lightframe.block.ColoredWallTorchBlock wallTorch) {
+                dev.puffspark.lightframe.block.ClientTorchScanner.registerTorch(world, pos, wallTorch.getTorchColor());
+                return;
+            } else {
+                dev.puffspark.lightframe.block.ClientTorchScanner.removeTorch(world, pos);
+            }
+        }
+
         if (state.getBlock() instanceof dev.puffspark.lightframe.block.ColoredTorchBlock ||
             state.getBlock() instanceof dev.puffspark.lightframe.block.ColoredWallTorchBlock ||
             dev.puffspark.lightframe.block.BlockLightManager.hasTorch(world, pos)) {

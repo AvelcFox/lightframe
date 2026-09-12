@@ -51,7 +51,7 @@ public final class RGBLightEngine {
     // ------------------------------------------------------------------ API
 
     /** Creates and registers a source; returns null if the source cap is hit. */
-    ColorLightSource createSource(Vec3d pos, dev.puffspark.lightframe.api.LightColor color, int radius, float intensity, java.util.UUID forcedId) {
+    public ColorLightSource createSource(Vec3d pos, dev.puffspark.lightframe.api.LightColor color, int radius, float intensity, java.util.UUID forcedId) {
         if (sources.isFull(config.maxLightSources)) {
             return null;
         }

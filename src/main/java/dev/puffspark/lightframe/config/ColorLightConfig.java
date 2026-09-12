@@ -22,7 +22,7 @@ public final class ColorLightConfig {
     /** Master switch for the whole RGB lighting system. */
     public boolean enableRGBLighting = true;
     /** Hard cap on live sources per world. */
-    public int maxLightSources = 128;
+    public int maxLightSources = 512;
     /** Hard cap on source radius, blocks. */
     public int maxLightRadius = 32;
     /** LOW: per-block tint sampling, MEDIUM: default, HIGH: reserved for per-vertex refinements. */
