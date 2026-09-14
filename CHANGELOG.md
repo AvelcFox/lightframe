@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [0.2.1+1.21.1] - 2026-09-14
+## [0.3.0+1.21.1] - 2026-09-14
 
 ### Added
 * **Directional / Cone Light (Направленный свет):**
