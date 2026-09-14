@@ -200,7 +200,13 @@ public final class RGBLightEngine {
                 Vec3d p = s.getPosition();
                 dev.puffspark.lightframe.api.LightColor c = s.getColor();
                 int r = s.boxRadius();
-                LightPropagation.addSource(world, storage, dirty, p.x, p.y, p.z, c.r, c.g, c.b, s.getIntensity(), r);
+                Vec3d dir = s.getDirection();
+                boolean isDir = s.isDirectional() && dir != null;
+                double dx = isDir ? dir.x : 0.0;
+                double dy = isDir ? dir.y : 0.0;
+                double dz = isDir ? dir.z : 0.0;
+                LightPropagation.addSource(world, storage, dirty, p.x, p.y, p.z, c.r, c.g, c.b, s.getIntensity(), r,
+                        isDir, dx, dy, dz, s.getCosInner(), s.getCosOuter());
                 BlockPos origin = BlockPos.ofFloored(p.x, p.y, p.z);
                 s.boxMinX = origin.getX() - r;
                 s.boxMinY = origin.getY() - r;
@@ -230,7 +236,13 @@ public final class RGBLightEngine {
                 Vec3d p = s.getPosition();
                 dev.puffspark.lightframe.api.LightColor c = s.getColor();
                 int r = s.boxRadius();
-                LightPropagation.addSource(world, storage, dirty, p.x, p.y, p.z, c.r, c.g, c.b, s.getIntensity(), r);
+                Vec3d dir = s.getDirection();
+                boolean isDir = s.isDirectional() && dir != null;
+                double dx = isDir ? dir.x : 0.0;
+                double dy = isDir ? dir.y : 0.0;
+                double dz = isDir ? dir.z : 0.0;
+                LightPropagation.addSource(world, storage, dirty, p.x, p.y, p.z, c.r, c.g, c.b, s.getIntensity(), r,
+                        isDir, dx, dy, dz, s.getCosInner(), s.getCosOuter());
                 BlockPos origin = BlockPos.ofFloored(p.x, p.y, p.z);
                 s.boxMinX = origin.getX() - r;
                 s.boxMinY = origin.getY() - r;

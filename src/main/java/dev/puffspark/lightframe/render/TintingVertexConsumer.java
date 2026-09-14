@@ -26,6 +26,7 @@ public final class TintingVertexConsumer implements VertexConsumer {
     private final float uniformTr, uniformTg, uniformTb;
     private final int fallbackBoost;
     private final boolean perVertex;
+    private final AmbientLightCube ambientCube;
 
     /** Constructor for terrain blocks with per-vertex smooth gradient tinting and light boost. */
     public TintingVertexConsumer(VertexConsumer delegate, World world, BlockPos blockPos,
@@ -38,10 +39,16 @@ public final class TintingVertexConsumer implements VertexConsumer {
         this.uniformTb = fallbackB;
         this.fallbackBoost = fallbackBoost;
         this.perVertex = true;
+        this.ambientCube = null;
     }
 
     /** Constructor for entities and fallback flat tinting with optional light boost. */
     public TintingVertexConsumer(VertexConsumer delegate, float r, float g, float b, int boost) {
+        this(delegate, r, g, b, boost, null);
+    }
+
+    /** Constructor for entities with normal-aware directional lighting cube. */
+    public TintingVertexConsumer(VertexConsumer delegate, float r, float g, float b, int boost, AmbientLightCube ambientCube) {
         this.delegate = delegate;
         this.world = null;
         this.blockPos = null;
@@ -50,11 +57,12 @@ public final class TintingVertexConsumer implements VertexConsumer {
         this.uniformTb = b;
         this.fallbackBoost = boost;
         this.perVertex = false;
+        this.ambientCube = ambientCube;
     }
 
     /** Constructor for entities and fallback flat tinting. */
     public TintingVertexConsumer(VertexConsumer delegate, float r, float g, float b) {
-        this(delegate, r, g, b, 0);
+        this(delegate, r, g, b, 0, null);
     }
 
     public VertexConsumer delegate() {
@@ -67,7 +75,26 @@ public final class TintingVertexConsumer implements VertexConsumer {
     public void quad(MatrixStack.Entry entry, BakedQuad quad, float red, float green, float blue, float alpha,
                      int light, int overlay) {
         if (!perVertex || world == null || blockPos == null) {
-            delegate.quad(entry, quad, red * uniformTr, green * uniformTg, blue * uniformTb, alpha, light, overlay);
+            float r = red * uniformTr;
+            float g = green * uniformTg;
+            float b = blue * uniformTb;
+            if (ambientCube != null && dev.puffspark.lightframe.config.ColorLightConfig.get().entityDirectionalLighting) {
+                Direction face = quad.getFace();
+                Vec3i faceVec = face.getVector();
+                Matrix3f normMat = entry.getNormalMatrix();
+                Vector3f normal = new Vector3f((float) faceVec.getX(), (float) faceVec.getY(), (float) faceVec.getZ());
+                normal.mul(normMat);
+                float[] tint = new float[3];
+                ambientCube.computeTint(normal.x(), normal.y(), normal.z(), tint);
+                r = red * tint[0];
+                g = green * tint[1];
+                b = blue * tint[2];
+            }
+            int blockLight = (light & 0xFFFF) >> 4;
+            int skyLight = (light >> 16) & 0xFFFF;
+            int finalBlockLight = Math.max(blockLight, fallbackBoost);
+            int finalLight = (skyLight << 16) | (finalBlockLight << 4);
+            delegate.quad(entry, quad, r, g, b, alpha, finalLight, overlay);
             return;
         }
 
@@ -122,7 +149,31 @@ public final class TintingVertexConsumer implements VertexConsumer {
                      float red, float green, float blue, float alpha,
                      int[] lights, int overlay, boolean useWorldLight) {
         if (!perVertex || world == null || blockPos == null) {
-            delegate.quad(entry, quad, brightness, red * uniformTr, green * uniformTg, blue * uniformTb, alpha, lights, overlay, useWorldLight);
+            float r = red * uniformTr;
+            float g = green * uniformTg;
+            float b = blue * uniformTb;
+            if (ambientCube != null && dev.puffspark.lightframe.config.ColorLightConfig.get().entityDirectionalLighting) {
+                Direction face = quad.getFace();
+                Vec3i faceVec = face.getVector();
+                Matrix3f normMat = entry.getNormalMatrix();
+                Vector3f normal = new Vector3f((float) faceVec.getX(), (float) faceVec.getY(), (float) faceVec.getZ());
+                normal.mul(normMat);
+                float[] tint = new float[3];
+                ambientCube.computeTint(normal.x(), normal.y(), normal.z(), tint);
+                r = red * tint[0];
+                g = green * tint[1];
+                b = blue * tint[2];
+            }
+            int[] boostedLights = lights;
+            if (fallbackBoost > 0) {
+                boostedLights = new int[lights.length];
+                for (int i = 0; i < lights.length; i++) {
+                    int bl = (lights[i] & 0xFFFF) >> 4;
+                    int sl = (lights[i] >> 16) & 0xFFFF;
+                    boostedLights[i] = (sl << 16) | (Math.max(bl, fallbackBoost) << 4);
+                }
+            }
+            delegate.quad(entry, quad, brightness, r, g, b, alpha, boostedLights, overlay, useWorldLight);
             return;
         }
 
@@ -250,5 +301,35 @@ public final class TintingVertexConsumer implements VertexConsumer {
     @Override
     public VertexConsumer normal(MatrixStack.Entry entry, float x, float y, float z) {
         return delegate.normal(entry, x, y, z);
+    }
+
+    @Override
+    public void vertex(float x, float y, float z, int color,
+                       float u, float v, int overlay, int light,
+                       float normalX, float normalY, float normalZ) {
+        int a = (color >> 24) & 0xFF;
+        int cr = (color >> 16) & 0xFF;
+        int cg = (color >> 8) & 0xFF;
+        int cb = color & 0xFF;
+        float tr = uniformTr;
+        float tg = uniformTg;
+        float tb = uniformTb;
+        if (ambientCube != null && dev.puffspark.lightframe.config.ColorLightConfig.get().entityDirectionalLighting) {
+            float[] tint = new float[3];
+            ambientCube.computeTint(normalX, normalY, normalZ, tint);
+            tr = tint[0];
+            tg = tint[1];
+            tb = tint[2];
+        }
+        int nr = Math.min(255, Math.max(0, Math.round(cr * tr)));
+        int ng = Math.min(255, Math.max(0, Math.round(cg * tg)));
+        int nb = Math.min(255, Math.max(0, Math.round(cb * tb)));
+        int finalColor = (a << 24) | (nr << 16) | (ng << 8) | nb;
+
+        int blockLight = (light & 0xFFFF) >> 4;
+        int skyLight = (light >> 16) & 0xFFFF;
+        int finalBlockLight = Math.max(blockLight, fallbackBoost);
+        int finalLight = (skyLight << 16) | (finalBlockLight << 4);
+        delegate.vertex(x, y, z, finalColor, u, v, overlay, finalLight, normalX, normalY, normalZ);
     }
 }

@@ -156,6 +156,10 @@ public final class DynamicLightManager {
         return ACTIVE_LIGHTS.length > 0;
     }
 
+    public static DynamicLight[] getActiveLights() {
+        return ACTIVE_LIGHTS;
+    }
+
     public static boolean isNearSection(int secX, int secY, int secZ) {
         DynamicLight[] lights = ACTIVE_LIGHTS;
         if (lights.length == 0) return false;

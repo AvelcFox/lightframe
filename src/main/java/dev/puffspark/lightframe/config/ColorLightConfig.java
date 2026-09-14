@@ -43,10 +43,18 @@ public final class ColorLightConfig {
     public float tintStrength = 1.0f;
     /** Tint entities (experimental, Stage 3). */
     public boolean tintEntities = true;
+    /** Directional normal-aware lighting for entities. */
+    public boolean entityDirectionalLighting = true;
     /** Tint block entities (chests etc.). */
     public boolean tintBlockEntities = true;
     /** Max sections scheduled for rebuild per client tick (rebuild throttling). */
     public int maxSectionsRebuiltPerTick = 12;
+
+    // ---- Bloom (Atmospheric colored glow) ----
+    /** Enable atmospheric colored bloom aura around bright colored lights. */
+    public boolean enableBloom = true;
+    /** Bloom intensity multiplier (0.0 to 2.0). */
+    public float bloomIntensity = 0.8f;
 
     // ---- Iris fallback ----
     /** Keep feeding luminance into block light when a shaderpack is active (monochrome dynamic light). */

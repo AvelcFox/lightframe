@@ -40,6 +40,15 @@ public final class LightPropagation {
                                  double px, double py, double pz,
                                  float cr, float cg, float cb,
                                  float intensity, int radius) {
+        addSource(world, storage, dirty, px, py, pz, cr, cg, cb, intensity, radius, false, 0.0, 0.0, 0.0, 1.0, 0.0);
+    }
+
+    public static void addSource(World world, ChunkLightStorage storage, LongSet dirty,
+                                 double px, double py, double pz,
+                                 float cr, float cg, float cb,
+                                 float intensity, int radius,
+                                 boolean isDirectional, double dirX, double dirY, double dirZ,
+                                 double cosInner, double cosOuter) {
         BlockPos origin = BlockPos.ofFloored(px, py, pz);
         int sx = origin.getX();
         int sy = origin.getY();
@@ -73,6 +82,7 @@ public final class LightPropagation {
 
         double radiusDouble = radius;
         double radiusSq = radiusDouble * radiusDouble;
+        double angleRange = cosInner - cosOuter;
 
         while (!queue.isEmpty()) {
             long packed = queue.dequeueLong();
@@ -105,6 +115,19 @@ public final class LightPropagation {
 
                 // Smooth Hermite falloff curve: 1 - t*t*(3 - 2*t) gives a bright luminous core and soft outer fade
                 float falloff = Math.max(0.0f, 1.0f - t * t * (3.0f - 2.0f * t));
+
+                // Directional cone attenuation
+                if (isDirectional && dist > 0.001) {
+                    double cosAlpha = (dx * dirX + dy * dirY + dz * dirZ) / dist;
+                    if (cosAlpha <= cosOuter) {
+                        continue; // Outside cone cutoff
+                    }
+                    if (cosAlpha < cosInner && angleRange > 1e-6) {
+                        float factor = (float) ((cosAlpha - cosOuter) / angleRange);
+                        factor = Math.max(0.0f, Math.min(1.0f, factor));
+                        falloff *= (factor * factor * (3.0f - 2.0f * factor));
+                    }
+                }
 
                 // Partial opacity attenuation (e.g. water, leaves)
                 if (opacity > 0) {

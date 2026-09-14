@@ -52,5 +52,23 @@ public interface ColorLight {
 
     /** True until {@link #remove()} was called. */
     boolean isAlive();
+
+    /** True if this source is restricted to a directional cone beam. */
+    boolean isDirectional();
+
+    /** Normalized direction vector of the cone beam, or null if omnidirectional. */
+    Vec3d getDirection();
+
+    /** Sets the forward direction vector for this source. Passing null makes it omnidirectional. */
+    void setDirection(Vec3d direction);
+
+    /** Inner cone half-angle in degrees (full brightness inside). */
+    float getInnerAngle();
+
+    /** Outer cone half-angle in degrees (fades to 0 at edge). */
+    float getOuterAngle();
+
+    /** Sets the inner and outer cone half-angles in degrees (e.g. 25f, 45f). */
+    void setConeAngles(float innerDegrees, float outerDegrees);
 }
 

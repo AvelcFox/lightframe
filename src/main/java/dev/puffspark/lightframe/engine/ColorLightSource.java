@@ -29,6 +29,13 @@ public final class ColorLightSource implements ColorLight {
     volatile boolean enabled = true;
     volatile boolean alive = true;
 
+    // Directional / cone light beam parameters
+    volatile Vec3d direction = null;
+    volatile float innerAngle = 30.0f;
+    volatile float outerAngle = 45.0f;
+    volatile double cosInner = Math.cos(Math.toRadians(30.0));
+    volatile double cosOuter = Math.cos(Math.toRadians(45.0));
+
     // box of the last successful propagation (engine thread only)
     int boxMinX, boxMinY, boxMinZ, boxMaxX, boxMaxY, boxMaxZ;
     boolean hasBox;
@@ -66,6 +73,51 @@ public final class ColorLightSource implements ColorLight {
     @Override public Vec3d getPosition() { return new Vec3d(x, y, z); }
     @Override public boolean isEnabled() { return enabled; }
     @Override public boolean isAlive() { return alive; }
+
+    @Override
+    public boolean isDirectional() {
+        return direction != null;
+    }
+
+    @Override
+    public Vec3d getDirection() {
+        return direction;
+    }
+
+    @Override
+    public void setDirection(Vec3d dir) {
+        this.direction = (dir != null && dir.lengthSquared() > 1e-6) ? dir.normalize() : null;
+        EngineRegistry.onSourceMutated(this);
+    }
+
+    @Override
+    public float getInnerAngle() {
+        return innerAngle;
+    }
+
+    @Override
+    public float getOuterAngle() {
+        return outerAngle;
+    }
+
+    @Override
+    public void setConeAngles(float innerDegrees, float outerDegrees) {
+        float in = MathHelper.clamp(innerDegrees, 0.0f, 180.0f);
+        float out = MathHelper.clamp(outerDegrees, in, 180.0f);
+        this.innerAngle = in;
+        this.outerAngle = out;
+        this.cosInner = Math.cos(Math.toRadians(in));
+        this.cosOuter = Math.cos(Math.toRadians(out));
+        EngineRegistry.onSourceMutated(this);
+    }
+
+    public double getCosInner() {
+        return cosInner;
+    }
+
+    public double getCosOuter() {
+        return cosOuter;
+    }
 
     @Override
     public void setColor(LightColor newColor) {
@@ -112,6 +164,11 @@ public final class ColorLightSource implements ColorLight {
      */
     void applyState(double nx, double ny, double nz, float cr, float cg, float cb,
                     int rad, float inten, boolean en) {
+        applyState(nx, ny, nz, cr, cg, cb, rad, inten, en, null, 30.0f, 45.0f);
+    }
+
+    void applyState(double nx, double ny, double nz, float cr, float cg, float cb,
+                    int rad, float inten, boolean en, Vec3d dir, float inner, float outer) {
         this.x = nx;
         this.y = ny;
         this.z = nz;
@@ -119,6 +176,11 @@ public final class ColorLightSource implements ColorLight {
         this.radius = clampRadius(rad);
         this.intensity = MathHelper.clamp(inten, 0.0f, 4.0f);
         this.enabled = en;
+        this.direction = (dir != null && dir.lengthSquared() > 1e-6) ? dir.normalize() : null;
+        this.innerAngle = MathHelper.clamp(inner, 0.0f, 180.0f);
+        this.outerAngle = MathHelper.clamp(outer, this.innerAngle, 180.0f);
+        this.cosInner = Math.cos(Math.toRadians(this.innerAngle));
+        this.cosOuter = Math.cos(Math.toRadians(this.outerAngle));
     }
 
     int boxRadius() {

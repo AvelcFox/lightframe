@@ -158,6 +158,16 @@ public final class ColorLightNetworking {
         buf.writeInt(s.getRadius());
         buf.writeFloat(s.getIntensity());
         buf.writeBoolean(s.isEnabled());
+        boolean dir = s.isDirectional();
+        buf.writeBoolean(dir);
+        if (dir) {
+            net.minecraft.util.math.Vec3d d = s.getDirection();
+            buf.writeFloat((float) (d != null ? d.x : 0.0));
+            buf.writeFloat((float) (d != null ? d.y : 0.0));
+            buf.writeFloat((float) (d != null ? d.z : 0.0));
+            buf.writeFloat(s.getInnerAngle());
+            buf.writeFloat(s.getOuterAngle());
+        }
     }
 
     public static RegistryKey<World> parseDim(String s) {

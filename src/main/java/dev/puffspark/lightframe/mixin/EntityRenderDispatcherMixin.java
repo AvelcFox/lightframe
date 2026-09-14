@@ -57,7 +57,7 @@ public class EntityRenderDispatcherMixin {
         if (!ColorLightConfig.get().tintEntities) return vertexConsumers;
         double[] pos = CL_POS.get();
         if (pos == null) return vertexConsumers;
-        return VanillaLightingBackend.wrapProvider(vertexConsumers, pos[0], pos[1], pos[2]);
+        return VanillaLightingBackend.wrapEntityProvider(vertexConsumers, pos[0], pos[1], pos[2]);
     }
 
     @Inject(method = "render(Lnet/minecraft/entity/Entity;DDDFFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V",

@@ -304,6 +304,88 @@ public final class VanillaLightingBackend {
         return new TintingVertexConsumerProvider(provider, mult[0], mult[1], mult[2], boost);
     }
 
+    /** Samples 6-axis ambient cube around the position for normal-aware directional lighting. */
+    public static AmbientLightCube sampleAmbientCube(double x, double y, double z) {
+        World world = MinecraftClient.getInstance().world;
+        if (world == null) return null;
+
+        float centerR = 0f, centerG = 0f, centerB = 0f;
+        boolean hasCenter = false;
+        float[] cs = sampleAt(x, y, z);
+        if (cs != null) {
+            centerR = cs[0]; centerG = cs[1]; centerB = cs[2];
+            hasCenter = true;
+        }
+
+        double d = 0.8;
+        double[][] offsets = {
+                {d, 0, 0}, {-d, 0, 0}, {0, d, 0}, {0, -d, 0}, {0, 0, d}, {0, 0, -d}
+        };
+        float[][] axisRgb = new float[6][3];
+        boolean[] axisHas = new boolean[6];
+        boolean anyLight = hasCenter;
+
+        for (int i = 0; i < 6; i++) {
+            float[] s = sampleAt(x + offsets[i][0], y + offsets[i][1], z + offsets[i][2]);
+            if (s != null) {
+                axisRgb[i][0] = s[0];
+                axisRgb[i][1] = s[1];
+                axisRgb[i][2] = s[2];
+                axisHas[i] = true;
+                anyLight = true;
+            }
+        }
+
+        if (!anyLight) return null;
+
+        AmbientLightCube cube = new AmbientLightCube();
+        computeTintMultiplier(centerR, centerG, centerB, cube.center);
+
+        float[][] destMults = {cube.posX, cube.negX, cube.posY, cube.negY, cube.posZ, cube.negZ};
+        int maxBoost = 0;
+
+        for (int i = 0; i < 6; i++) {
+            if (axisHas[i]) {
+                computeTintMultiplier(axisRgb[i][0], axisRgb[i][1], axisRgb[i][2], destMults[i]);
+                float m = Math.max(axisRgb[i][0], Math.max(axisRgb[i][1], axisRgb[i][2]));
+                int boost = Math.min(15, Math.max(0, (int) Math.floor(15.0f * Math.pow(m, 0.85))));
+                if (boost > maxBoost) maxBoost = boost;
+            } else if (hasCenter) {
+                // Secondary shadow bounce: 30% intensity of center light
+                computeTintMultiplier(centerR * 0.3f, centerG * 0.3f, centerB * 0.3f, destMults[i]);
+            } else {
+                destMults[i][0] = 1.0f;
+                destMults[i][1] = 1.0f;
+                destMults[i][2] = 1.0f;
+            }
+        }
+
+        if (hasCenter) {
+            float m = Math.max(centerR, Math.max(centerG, centerB));
+            int boost = Math.min(15, Math.max(0, (int) Math.floor(15.0f * Math.pow(m, 0.85))));
+            if (boost > maxBoost) maxBoost = boost;
+        }
+
+        cube.maxBoost = maxBoost;
+        return cube;
+    }
+
+    /** Wraps an entity consumer provider with normal-aware directional lighting. */
+    public static VertexConsumerProvider wrapEntityProvider(VertexConsumerProvider provider, double x, double y, double z) {
+        if (provider instanceof TintingVertexConsumerProvider) return provider;
+        if (!tintActive()) return provider;
+
+        if (ColorLightConfig.get().entityDirectionalLighting) {
+            AmbientLightCube cube = sampleAmbientCube(x, y, z);
+            if (cube != null) {
+                return new TintingVertexConsumerProvider(provider, cube.center[0], cube.center[1], cube.center[2], cube.maxBoost, cube);
+            }
+            return provider;
+        }
+
+        return wrapProvider(provider, x, y, z);
+    }
+
     /**
      * Schedules a rebuild of one section (called from the client engine listener, client thread).
      */

@@ -75,6 +75,7 @@ public final class LightFrameClient implements ClientModInitializer {
                 "key.lightframe.toggle_debug", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_K, "category.lightframe"));
 
         LightDebugRenderer.register();
+        dev.puffspark.lightframe.render.BloomRenderer.register();
         DebugHud.register();
 
         for (dev.puffspark.lightframe.block.TorchColor color : dev.puffspark.lightframe.block.TorchColor.values()) {
@@ -146,7 +147,21 @@ public final class LightFrameClient implements ClientModInitializer {
         int radius = buf.readInt();
         float intensity = buf.readFloat();
         boolean enabled = buf.readBoolean();
-        return world -> EngineRegistry.upsertLocalSource(world, id, dim, x, y, z, r, g, b, radius, intensity, enabled);
+        boolean dir = buf.readableBytes() > 0 && buf.readBoolean();
+        net.minecraft.util.math.Vec3d direction = null;
+        float inner = 30.0f, outer = 45.0f;
+        if (dir && buf.readableBytes() >= 20) {
+            float dx = buf.readFloat();
+            float dy = buf.readFloat();
+            float dz = buf.readFloat();
+            direction = new net.minecraft.util.math.Vec3d(dx, dy, dz);
+            inner = buf.readFloat();
+            outer = buf.readFloat();
+        }
+        net.minecraft.util.math.Vec3d fDir = direction;
+        float fInner = inner;
+        float fOuter = outer;
+        return world -> EngineRegistry.upsertLocalSource(world, id, dim, x, y, z, r, g, b, radius, intensity, enabled, fDir, fInner, fOuter);
     }
 
     private static void applyOps(MinecraftClient client, List<java.util.function.Consumer<World>> ops) {

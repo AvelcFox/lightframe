@@ -7,7 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [0.2.1+1.21.1] - 2026-09-13
+## [0.2.1+1.21.1] - 2026-09-14
+
+### Added
+* **Directional / Cone Light (Направленный свет):**
+  * Added directional cone light sources with position, forward direction vector, and inner/outer cone cutoff angles.
+  * Implemented smooth angular Hermite falloff between inner angle (full brightness) and outer cutoff angle.
+  * Added public API method `ColorLightAPI.createDirectional(...)` and interface methods `isDirectional()`, `getDirection()`, `setDirection()`, `getInnerAngle()`, `getOuterAngle()`, `setConeAngles()`.
+  * Added testing command `/create_cone_light <color> [radius] [intensity] [innerAngle] [outerAngle]`.
+  * Added network synchronization for directional parameters across server and client.
+* **Colored Light Bloom (Мягкое цветное свечение):**
+  * Added an independent additive atmospheric bloom / glow pass rendering soft colored coronas around bright light sources and handheld torches.
+  * Built completely decoupled from voxel light propagation and screen blending (does not affect voxel calculations).
+  * Smooth camera distance fade preventing camera clipping artifacts.
+  * Configurable via Mod Menu toggle (`enableBloom`) and strength slider (`bloomIntensity`).
+* **Entity Directional Lighting (Направленное освещение сущностей):**
+  * Added 6-axis ambient lighting cube (`AmbientLightCube`) evaluating surface normals for player and mob model geometry.
+  * Faces oriented towards light sources receive rich directional diffuse tinting, while back faces receive realistic shadow bounces.
+  * Configurable via Mod Menu toggle (`entityDirectionalLighting`).
+* **Mod Menu Configuration Screen:**
+  * Added fully featured in-game configuration GUI accessible directly from Mod Menu.
+  * Full English and Russian localization with detailed tooltips for all settings.
 
 ### Fixed
 * **Replay Mod & Paused State Lighting (Flashback / ReplayMod):**

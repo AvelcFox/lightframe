@@ -65,6 +65,30 @@ public final class ColorLightCommands {
                                                 IntegerArgumentType.getInteger(ctx, "radius"),
                                                 FloatArgumentType.getFloat(ctx, "intensity")))))));
 
+        dispatcher.register(literal("create_cone_light")
+                .requires(src -> src.hasPermissionLevel(2))
+                .then(argument("color", StringArgumentType.word())
+                        .suggests(COLOR_SUGGESTIONS)
+                        .executes(ctx -> createConeLight(ctx.getSource(),
+                                StringArgumentType.getString(ctx, "color"), 12, 1.5f, 25.0f, 45.0f))
+                        .then(argument("radius", IntegerArgumentType.integer(1, 64))
+                                .executes(ctx -> createConeLight(ctx.getSource(),
+                                        StringArgumentType.getString(ctx, "color"),
+                                        IntegerArgumentType.getInteger(ctx, "radius"), 1.5f, 25.0f, 45.0f))
+                                .then(argument("intensity", FloatArgumentType.floatArg(0.0f, 4.0f))
+                                        .executes(ctx -> createConeLight(ctx.getSource(),
+                                                StringArgumentType.getString(ctx, "color"),
+                                                IntegerArgumentType.getInteger(ctx, "radius"),
+                                                FloatArgumentType.getFloat(ctx, "intensity"), 25.0f, 45.0f))
+                                        .then(argument("innerAngle", FloatArgumentType.floatArg(1.0f, 180.0f))
+                                                .then(argument("outerAngle", FloatArgumentType.floatArg(1.0f, 180.0f))
+                                                        .executes(ctx -> createConeLight(ctx.getSource(),
+                                                                StringArgumentType.getString(ctx, "color"),
+                                                                IntegerArgumentType.getInteger(ctx, "radius"),
+                                                                FloatArgumentType.getFloat(ctx, "intensity"),
+                                                                FloatArgumentType.getFloat(ctx, "innerAngle"),
+                                                                FloatArgumentType.getFloat(ctx, "outerAngle")))))))));
+
         dispatcher.register(literal("lightframe")
                 .requires(src -> src.hasPermissionLevel(0))
                 .then(literal("list").executes(ctx -> list(ctx.getSource())))
@@ -122,6 +146,41 @@ public final class ColorLightCommands {
         }
     }
 
+    private static int createConeLight(ServerCommandSource src, String colorStr, int radius, float intensity,
+                                       float innerAngle, float outerAngle) {
+        LightColor color = resolveColor(colorStr);
+        if (color == null) {
+            src.sendError(Text.literal("Unknown color: '" + colorStr + "'"));
+            return 0;
+        }
+
+        ServerPlayerEntity player = src.getPlayer();
+        if (player == null) {
+            src.sendError(Text.literal("An in-game player is required."));
+            return 0;
+        }
+
+        try {
+            ServerWorld world = src.getWorld();
+            Vec3d eye = player.getEyePos();
+            Vec3d look = player.getRotationVec(1.0f);
+            Vec3d pos = eye.add(look.x * 1.5, look.y * 1.5, look.z * 1.5);
+            pos = adjustToOpenAir(world, pos);
+            ColorLight light = ColorLightAPI.createDirectional(world, pos, look, innerAngle, outerAngle, color, radius, intensity);
+            if (light == null) {
+                src.sendError(Text.literal("Light source limit reached (maxLightSources)."));
+                return 0;
+            }
+            src.sendFeedback(() -> Text.literal(String.format(
+                    "[Colored Lights] created directional cone %s r=%d i=%.1f cone=[%.0f°-%.0f°] id=%s",
+                    color, radius, intensity, innerAngle, outerAngle, light.getId())), false);
+            return 1;
+        } catch (Exception e) {
+            src.sendError(Text.literal("Error creating cone light: " + e.getMessage()));
+            return 0;
+        }
+    }
+
     private static int list(ServerCommandSource src) {
         var all = ColorLightAPI.getAll(src.getWorld());
         if (all.isEmpty()) {
@@ -130,10 +189,12 @@ public final class ColorLightCommands {
         }
         src.sendFeedback(() -> Text.literal("[Colored Lights] " + all.size() + " source(s):"), false);
         for (ColorLight l : all) {
+            String dirStr = l.isDirectional() ? String.format(Locale.ROOT, " cone=[%.0f°-%.0f°]", l.getInnerAngle(), l.getOuterAngle()) : "";
             src.sendFeedback(() -> Text.literal(String.format(Locale.ROOT,
-                    "  %s %s radius=%d intensity=%.2f pos=(%.1f, %.1f, %.1f)%s",
+                    "  %s %s radius=%d intensity=%.2f pos=(%.1f, %.1f, %.1f)%s%s",
                     l.getId(), l.getColor(), l.getRadius(), l.getIntensity(),
                     l.getPosition().x, l.getPosition().y, l.getPosition().z,
+                    dirStr,
                     l.isEnabled() ? "" : "  [disabled]")), false);
         }
         return all.size();

@@ -134,37 +134,74 @@ public class LightFrameConfigScreen extends GameOptionsScreen {
 
         this.body.addWidgetEntry(radiusSlider, rebuildSlider);
 
-        // 5. Tint Entities & Tint Block Entities
+        // 5. Tint Entities & Directional Entity Lighting
         CyclingButtonWidget<Boolean> entitiesBtn = CyclingButtonWidget.onOffBuilder(cfg.tintEntities)
                 .tooltip(val -> Tooltip.of(Text.translatable("lightframe.config.tint_entities.tooltip")))
                 .build(0, 0, 150, 20, Text.translatable("lightframe.config.tint_entities"), (btn, val) -> {
                     cfg.tintEntities = val;
                 });
 
+        CyclingButtonWidget<Boolean> directionalBtn = CyclingButtonWidget.onOffBuilder(cfg.entityDirectionalLighting)
+                .tooltip(val -> Tooltip.of(Text.translatable("lightframe.config.entity_directional.tooltip")))
+                .build(0, 0, 150, 20, Text.translatable("lightframe.config.entity_directional"), (btn, val) -> {
+                    cfg.entityDirectionalLighting = val;
+                });
+
+        this.body.addWidgetEntry(entitiesBtn, directionalBtn);
+
+        // 6. Colored Light Bloom & Bloom Intensity Slider
+        CyclingButtonWidget<Boolean> bloomBtn = CyclingButtonWidget.onOffBuilder(cfg.enableBloom)
+                .tooltip(val -> Tooltip.of(Text.translatable("lightframe.config.enable_bloom.tooltip")))
+                .build(0, 0, 150, 20, Text.translatable("lightframe.config.enable_bloom"), (btn, val) -> {
+                    cfg.enableBloom = val;
+                });
+
+        double bloomVal = Math.min(1.0, Math.max(0.0, cfg.bloomIntensity / 2.0));
+        SliderWidget bloomSlider = new SliderWidget(0, 0, 150, 20, Text.empty(), bloomVal) {
+            {
+                updateMessage();
+                setTooltip(Tooltip.of(Text.translatable("lightframe.config.bloom_intensity.tooltip")));
+            }
+
+            @Override
+            protected void updateMessage() {
+                int pct = (int) Math.round(value * 200.0);
+                setMessage(Text.translatable("lightframe.config.bloom_intensity", pct + "%"));
+            }
+
+            @Override
+            protected void applyValue() {
+                cfg.bloomIntensity = (float) (value * 2.0);
+            }
+        };
+
+        this.body.addWidgetEntry(bloomBtn, bloomSlider);
+
+        // 7. Tint Block Entities & Shader Brightness Fallback
         CyclingButtonWidget<Boolean> blockEntitiesBtn = CyclingButtonWidget.onOffBuilder(cfg.tintBlockEntities)
                 .tooltip(val -> Tooltip.of(Text.translatable("lightframe.config.tint_block_entities.tooltip")))
                 .build(0, 0, 150, 20, Text.translatable("lightframe.config.tint_block_entities"), (btn, val) -> {
                     cfg.tintBlockEntities = val;
                 });
 
-        this.body.addWidgetEntry(entitiesBtn, blockEntitiesBtn);
-
-        // 6. Shader Dynamic Light & Debug Mode
         CyclingButtonWidget<Boolean> shaderDynBtn = CyclingButtonWidget.onOffBuilder(cfg.irisFallbackKeepDynamicLight)
                 .tooltip(val -> Tooltip.of(Text.translatable("lightframe.config.shader_dynamic.tooltip")))
                 .build(0, 0, 150, 20, Text.translatable("lightframe.config.shader_dynamic"), (btn, val) -> {
                     cfg.irisFallbackKeepDynamicLight = val;
                 });
 
+        this.body.addWidgetEntry(blockEntitiesBtn, shaderDynBtn);
+
+        // 8. Debug Mode
         CyclingButtonWidget<Boolean> debugBtn = CyclingButtonWidget.onOffBuilder(cfg.debugMode)
                 .tooltip(val -> Tooltip.of(Text.translatable("lightframe.config.debug_mode.tooltip")))
                 .build(0, 0, 150, 20, Text.translatable("lightframe.config.debug_mode"), (btn, val) -> {
                     cfg.debugMode = val;
                 });
 
-        this.body.addWidgetEntry(shaderDynBtn, debugBtn);
+        this.body.addWidgetEntry(debugBtn, null);
 
-        // 7. Reset to defaults
+        // 9. Reset to defaults
         ButtonWidget resetBtn = ButtonWidget.builder(Text.translatable("lightframe.config.reset"), btn -> {
             ColorLightConfig def = new ColorLightConfig();
             cfg.enableRGBLighting = def.enableRGBLighting;
@@ -176,6 +213,9 @@ public class LightFrameConfigScreen extends GameOptionsScreen {
             cfg.maxLightRadius = def.maxLightRadius;
             cfg.maxSectionsRebuiltPerTick = def.maxSectionsRebuiltPerTick;
             cfg.tintEntities = def.tintEntities;
+            cfg.entityDirectionalLighting = def.entityDirectionalLighting;
+            cfg.enableBloom = def.enableBloom;
+            cfg.bloomIntensity = def.bloomIntensity;
             cfg.tintBlockEntities = def.tintBlockEntities;
             cfg.irisFallbackKeepDynamicLight = def.irisFallbackKeepDynamicLight;
             cfg.debugMode = def.debugMode;

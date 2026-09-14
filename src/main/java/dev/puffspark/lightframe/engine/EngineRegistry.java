@@ -95,6 +95,22 @@ public final class EngineRegistry {
         return s;
     }
 
+    public static ColorLight createDirectionalSource(World world, Vec3d pos, Vec3d dir,
+                                                     float innerAngle, float outerAngle,
+                                                     LightColor color, int radius, float intensity) {
+        if (world == null || !ColorLightConfigProxy.enabled()) return null;
+        RGBLightEngine engine = engineFor(world);
+        ColorLightSource s = engine.createSource(pos, color, radius, intensity, null);
+        if (s != null) {
+            s.setConeAngles(innerAngle, outerAngle);
+            s.setDirection(dir);
+            if (!world.isClient()) {
+                ColorLightNetworking.broadcastAdd((net.minecraft.server.world.ServerWorld) world, s);
+            }
+        }
+        return s;
+    }
+
     public static Optional<ColorLight> getSource(World world, UUID id) {
         RGBLightEngine e = engineOrNull(world);
         return e == null ? Optional.empty() : e.sources().byId(id).map(s -> (ColorLight) s);
@@ -165,11 +181,19 @@ public final class EngineRegistry {
                                          double x, double y, double z,
                                          float r, float g, float b,
                                          int radius, float intensity, boolean enabled) {
+        upsertLocalSource(world, id, dim, x, y, z, r, g, b, radius, intensity, enabled, null, 30.0f, 45.0f);
+    }
+
+    public static void upsertLocalSource(World world, UUID id, String dim,
+                                         double x, double y, double z,
+                                         float r, float g, float b,
+                                         int radius, float intensity, boolean enabled,
+                                         Vec3d dir, float inner, float outer) {
         if (!world.getRegistryKey().getValue().toString().equals(dim)) return;
         RGBLightEngine engine = engineFor(world);
         ColorLightSource existing = engine.sources().get(id);
         if (existing != null) {
-            existing.applyState(x, y, z, r, g, b, radius, intensity, enabled);
+            existing.applyState(x, y, z, r, g, b, radius, intensity, enabled, dir, inner, outer);
             engine.sourceChanged(existing);
             return;
         }
@@ -180,7 +204,7 @@ public final class EngineRegistry {
         ColorLightSource created = engine.createSource(
                 new Vec3d(x, y, z), LightColor.of(r, g, b), radius, intensity, id);
         if (created != null) {
-            created.applyState(x, y, z, r, g, b, radius, intensity, enabled);
+            created.applyState(x, y, z, r, g, b, radius, intensity, enabled, dir, inner, outer);
         }
     }
 

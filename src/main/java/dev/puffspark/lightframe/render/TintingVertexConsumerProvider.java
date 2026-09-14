@@ -14,20 +14,26 @@ public final class TintingVertexConsumerProvider implements VertexConsumerProvid
     private final VertexConsumerProvider delegate;
     private final float tr, tg, tb;
     private final int boost;
+    private final AmbientLightCube ambientCube;
 
     private RenderLayer lastLayer;
     private VertexConsumer lastWrapped;
 
-    public TintingVertexConsumerProvider(VertexConsumerProvider delegate, float r, float g, float b, int boost) {
+    public TintingVertexConsumerProvider(VertexConsumerProvider delegate, float r, float g, float b, int boost, AmbientLightCube ambientCube) {
         this.delegate = delegate;
         this.tr = r;
         this.tg = g;
         this.tb = b;
         this.boost = boost;
+        this.ambientCube = ambientCube;
+    }
+
+    public TintingVertexConsumerProvider(VertexConsumerProvider delegate, float r, float g, float b, int boost) {
+        this(delegate, r, g, b, boost, null);
     }
 
     public TintingVertexConsumerProvider(VertexConsumerProvider delegate, float r, float g, float b) {
-        this(delegate, r, g, b, 0);
+        this(delegate, r, g, b, 0, null);
     }
 
     @Override
@@ -35,7 +41,7 @@ public final class TintingVertexConsumerProvider implements VertexConsumerProvid
         VertexConsumer raw = delegate.getBuffer(layer);
         if (raw instanceof TintingVertexConsumer) return raw;
         if (layer == lastLayer && lastWrapped != null) return lastWrapped;
-        VertexConsumer wrapped = new TintingVertexConsumer(raw, tr, tg, tb, boost);
+        VertexConsumer wrapped = new TintingVertexConsumer(raw, tr, tg, tb, boost, ambientCube);
         lastLayer = layer;
         lastWrapped = wrapped;
         return wrapped;
