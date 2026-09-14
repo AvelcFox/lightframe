@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [0.3.0+1.21.1] - 2026-09-14
+## [0.3.0-dev] - Unreleased
 
 ### Added
 * **Directional / Cone Light (Направленный свет):**
@@ -28,6 +28,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * **Mod Menu Configuration Screen:**
   * Added fully featured in-game configuration GUI accessible directly from Mod Menu.
   * Full English and Russian localization with detailed tooltips for all settings.
+
+---
+
+## [0.2.1+1.21.1] - 2026-09-13
 
 ### Fixed
 * **Replay Mod & Paused State Lighting (Flashback / ReplayMod):**
