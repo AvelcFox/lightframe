@@ -24,6 +24,9 @@
     ],
     "client": [
       "dev.puffspark.lightframe.LightFrameClient"
+    ],
+    "modmenu": [
+      "dev.puffspark.lightframe.compat.modmenu.ModMenuIntegration"
     ]
   },
   "mixins": [

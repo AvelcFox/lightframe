@@ -28,6 +28,7 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     modCompileOnly files("libs/sodium-fabric-0.8.13+mc1.21.1.jar")
+    modCompileOnly files("libs/modmenu-11.0.4.jar")
 }
 
 processResources {
